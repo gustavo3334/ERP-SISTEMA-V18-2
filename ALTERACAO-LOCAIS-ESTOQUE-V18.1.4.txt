@@ -1,0 +1,24 @@
+FÁCIL PEDIDO ERP — V18.1.4
+Correção robusta do campo "Local de estoque"
+
+Problema observado:
+- O cadastro de produto podia exibir o select de Local de estoque vazio, mesmo com o backend respondendo outras APIs.
+- A hidratação antiga de Engenharia não garantia que o endpoint de locais fosse consultado antes/depois da montagem do modal.
+
+Correção:
+- Adicionado stock-locations-hotfix.js carregado por último no front.
+- Prefetch direto em /api/v1/stock-locations ao iniciar a interface.
+- Interceptação do modal de Produto para carregar locais antes de abrir.
+- MutationObserver como segunda camada: qualquer select name=locationId criado no modal é preenchido automaticamente.
+- Se os locais padrão não existirem, o front tenta criar Estoque Principal, Matéria-prima, Expedição e Quarentena/Avarias via API.
+- Select mostra nome, código e detalhes do endereço.
+- Ajuda abaixo do campo exibe versão v18.1.4 e botão "recarregar".
+- Em falha de API, o campo mostra mensagem de erro em vez de ficar vazio.
+- Asset servido com no-store no FastAPI e query string de versão para evitar cache antigo.
+
+Validação:
+- 64/64 testes automatizados aprovados.
+- JavaScript novo validado com node --check.
+- Todos os scripts inline de frontend/index.html e public/index.html validados.
+- GET /api/v1/stock-locations => HTTP 200 e 4 locais operacionais.
+- GET /stock-locations-hotfix.js?v=18.1.4 => HTTP 200 e Cache-Control no-store.

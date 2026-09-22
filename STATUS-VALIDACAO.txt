@@ -1,0 +1,16 @@
+STATUS DA VALIDAÇÃO — FÁCIL PEDIDO ERP
+
+Python: OK
+JavaScript: OK
+Testes automatizados: 33 aprovados
+Alembic banco novo até 0007: OK
+Alembic banco existente 0006 -> 0007: OK
+
+Últimos ajustes validados:
+- filtro RH por Registrado / Sem registro / MEI
+- cores distintas dos vínculos
+- formas de pagamento múltiplas por cliente
+- pagamento preferencial
+- tabela de preços por cliente/produto
+- aplicação do preço personalizado em orçamento
+- persistência relacional de clientes no PostgreSQL

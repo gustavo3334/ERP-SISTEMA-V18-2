@@ -1,0 +1,74 @@
+FÁCIL PEDIDO ERP V18.2 — SUPABASE + VERCEL
+==========================================
+
+ESTA VERSÃO FOI PREPARADA PARA POSTGRESQL DO SUPABASE EM AMBIENTE SERVERLESS.
+
+1) SUPABASE
+- Crie o projeto.
+- Clique em Connect.
+- Para Vercel, pode usar Transaction Pooler (porta 6543).
+- Copie a connection string completa.
+- NÃO envie a connection string para terceiros: ela contém a senha do banco.
+
+2) VERCEL — PRIMEIRO DEPLOY
+Importe o repositório/pasta com:
+- Framework: FastAPI
+- Root Directory: ./
+
+Environment Variables mínimas:
+DATABASE_URL=<connection string do Supabase>
+ENVIRONMENT=production
+AUTH_DISABLED=false
+AUTO_CREATE_TABLES=true
+SEED_ADMIN=false
+SECRET_KEY=<32+ caracteres aleatórios>
+
+Gere SECRET_KEY localmente:
+python -c "import secrets; print(secrets.token_urlsafe(64))"
+
+3) TESTE ANTES DO LOGIN
+Abra:
+/api/v1/health
+
+Esperado com tudo correto:
+status: ok
+backend: online
+database: connected
+database_provider: supabase
+configuration: ok
+
+Se houver problema de banco/configuração, o endpoint continuará abrindo e mostrará
+status=degraded. A V18.2 evita que um erro de bootstrap vire apenas
+FUNCTION_INVOCATION_FAILED sem diagnóstico.
+
+Teste também:
+/api/v1/ready
+
+Esse endpoint retorna 200 somente quando configuração e banco estiverem prontos.
+
+4) CRIAR ADMINISTRADOR
+Depois de confirmar /health e /ready, configure na Vercel:
+SEED_ADMIN=true
+ADMIN_NAME=Administrador
+ADMIN_EMAIL=<seu e-mail>
+ADMIN_PASSWORD=<senha forte com pelo menos 12 caracteres>
+
+Faça novo deploy. Depois de confirmar o login, pode voltar SEED_ADMIN=false.
+O usuário criado permanece no PostgreSQL.
+
+5) PERSISTÊNCIA
+Com DATABASE_URL apontando para Supabase, os cadastros permanecem no PostgreSQL.
+Fechar navegador, reiniciar função ou fazer novo deploy não apaga o banco.
+
+6) TRANSACTION POOLER
+A V18.2 detecta automaticamente Supabase + porta 6543 e usa:
+- psycopg 3
+- prepare_threshold=None
+- SQLAlchemy NullPool na Vercel/serverless
+
+Isso evita incompatibilidade de prepared statements com PgBouncer Transaction Pooler.
+O Session Pooler (5432) também funciona.
+
+7) IMPORTANTE
+Nunca commite arquivo .env com senhas.
+Nunca exponha DATABASE_URL, SECRET_KEY ou ADMIN_PASSWORD.

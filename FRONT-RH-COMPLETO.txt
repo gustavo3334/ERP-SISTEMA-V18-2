@@ -1,0 +1,21 @@
+ATUALIZAÇÃO DE FRONT-END — RH COMPLETO
+
+O backend desta pasta permanece igual à Fase 1.2.
+Nesta etapa foram adicionadas apenas as novas telas e regras de front-end do RH/Colaboradores.
+
+Novidades:
+- PF e MEI
+- endereço completo e CEP
+- casa/apartamento/bloco
+- contatos e emergência
+- saúde
+- documentos
+- foto
+- registrado/sem registro/MEI com alerta visual
+- filhos e pensão
+- banco, portabilidade e PIX
+- salário e bônus
+- impressão cadastral
+- produção por peça e apontamentos
+
+Os novos cadastros ainda são armazenados localmente no navegador até a próxima fase, quando serão modelados e conectados ao backend.

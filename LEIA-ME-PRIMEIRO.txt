@@ -1,0 +1,23 @@
+FÁCIL PEDIDO ERP — BACKEND COMPLETO — WINDOWS
+
+PRIMEIRA VEZ
+1. Extraia a pasta inteira.
+2. Execute INSTALAR-WINDOWS.bat.
+3. Execute VERIFICAR-SISTEMA-WINDOWS.bat.
+4. Execute ABRIR-SISTEMA-WINDOWS.bat.
+
+ENDEREÇOS
+Sistema: http://127.0.0.1:8000
+API: http://127.0.0.1:8000/api/v1
+Documentação: http://127.0.0.1:8000/docs
+
+DADOS
+Banco local: data\facil_pedido.db
+Documentos: storage\uploads
+Backups: backup
+
+IMPORTANTE
+- Não feche a janela do servidor enquanto estiver usando o ERP.
+- O banco começa sem dados demonstrativos.
+- Para vários computadores, use PostgreSQL.
+- Antes do uso definitivo, configure autenticação e uma SECRET_KEY própria.

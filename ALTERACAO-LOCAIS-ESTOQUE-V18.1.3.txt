@@ -1,0 +1,7 @@
+Fácil Pedido ERP V18.1.3 — correção runtime dos locais de estoque
+
+- O cadastro de produto consulta /api/v1/stock-locations ANTES de montar o formulário.
+- Se os locais padrão não existirem, tenta criá-los e relê a API.
+- Em localhost/127.0.0.1, autenticação de front não bloqueia a hidratação quando o backend está em modo desenvolvimento.
+- Service workers antigos são desregistrados localmente e caches do Fácil Pedido são apagados para evitar HTML antigo.
+- O subtítulo do cadastro de Produto mostra v18.1.3 para confirmação visual.

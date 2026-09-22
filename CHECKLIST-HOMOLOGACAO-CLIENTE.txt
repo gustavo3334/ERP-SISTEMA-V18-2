@@ -1,0 +1,42 @@
+CHECKLIST DE HOMOLOGAÇÃO — FÁCIL PEDIDO ERP
+
+[ ] O sistema abriu sem erro
+[ ] Criei um cliente
+[ ] Editei um cliente
+[ ] Excluí um cliente de teste
+[ ] Criei um fornecedor
+[ ] Cadastrei matéria-prima
+[ ] Cadastrei pré-fabricado
+[ ] Cadastrei produto acabado
+[ ] Movimentei estoque
+[ ] Criei uma ficha técnica
+[ ] Criei uma ordem de produção
+[ ] Testei Produzir do zero
+[ ] Testei Baú blindado
+[ ] Testei Retirar do estoque de vazado
+[ ] Movi uma OP no Kanban
+[ ] Finalizei uma produção
+[ ] Conferi a entrada no estoque
+[ ] Criei uma compra
+[ ] Recebi uma compra
+[ ] Conferi o financeiro
+[ ] Criei uma venda
+[ ] Testei expedição
+[ ] Criei uma entrega
+[ ] Testei rota
+[ ] Cadastrei colaborador PF
+[ ] Cadastrei colaborador MEI
+[ ] Preenchi endereço
+[ ] Testei vale-transporte
+[ ] Cadastrei contato de emergência
+[ ] Cadastrei dependente
+[ ] Cadastrei pensão
+[ ] Cadastrei conta bancária/PIX
+[ ] Cadastrei bônus
+[ ] Cadastrei valor por peça
+[ ] Lancei produção por funcionário
+[ ] Imprimi ficha cadastral
+[ ] Fechei o sistema
+[ ] Abri novamente
+[ ] Os dados continuaram salvos
+[ ] Fiz backup da homologação

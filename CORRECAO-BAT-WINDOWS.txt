@@ -1,0 +1,19 @@
+CORRECAO WINDOWS
+
+Esta versao corrige a codificacao e as quebras de linha dos arquivos .BAT.
+
+No terminal PowerShell, execute:
+
+.\INSTALAR-WINDOWS.bat
+
+Depois:
+
+.\VERIFICAR-HOMOLOGACAO-WINDOWS.bat
+
+E por fim:
+
+.\ABRIR-HOMOLOGACAO-CLIENTE-WINDOWS.bat
+
+Alternativa de instalacao em PowerShell:
+
+powershell -ExecutionPolicy Bypass -File .\INSTALAR-WINDOWS.ps1

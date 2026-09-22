@@ -1,0 +1,18 @@
+FÁCIL PEDIDO ERP — POSTGRESQL
+
+Para uso definitivo com vários computadores, configure um PostgreSQL.
+
+1. Crie o banco PostgreSQL.
+2. Abra o arquivo .env.
+3. Troque:
+
+DATABASE_URL=sqlite:///./data/facil_pedido.db
+
+por:
+
+DATABASE_URL=postgresql+psycopg://USUARIO:SENHA@SERVIDOR:5432/facilpedido
+
+4. Execute ABRIR-SISTEMA-WINDOWS.bat.
+5. O Alembic criará/atualizará a estrutura.
+
+Faça backup antes de migrar dados reais.

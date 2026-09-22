@@ -1,0 +1,122 @@
+FÁCIL PEDIDO ERP
+VERSÃO DE HOMOLOGAÇÃO DO CLIENTE
+
+============================================================
+IMPORTANTE
+============================================================
+
+Esta versão é destinada a TESTES.
+
+Use dados fictícios.
+Não cadastre CPF, RG, ficha de saúde, salário, dados bancários
+ou documentos reais de funcionários nesta etapa.
+
+Ao abrir o sistema, aparecerá no topo:
+
+AMBIENTE DE HOMOLOGAÇÃO
+DADOS DE TESTE — NÃO UTILIZAR DADOS REAIS OU SENSÍVEIS
+
+============================================================
+PRIMEIRA VEZ
+============================================================
+
+1. Extraia TODO o arquivo ZIP para uma pasta.
+2. Execute:
+   INSTALAR-WINDOWS.bat
+
+3. Depois execute:
+   VERIFICAR-HOMOLOGACAO-WINDOWS.bat
+
+4. Para entrar no sistema execute:
+   ABRIR-HOMOLOGACAO-CLIENTE-WINDOWS.bat
+
+O navegador abrirá automaticamente.
+
+Endereço local:
+http://127.0.0.1:8000
+
+============================================================
+DADOS
+============================================================
+
+Os cadastros de teste são mantidos mesmo depois de fechar o sistema.
+
+Banco exclusivo da homologação:
+data\facil_pedido_homologacao.db
+
+Documentos de teste:
+storage\homologacao\uploads
+
+Esse banco NÃO é o mesmo banco da versão principal.
+
+============================================================
+BACKUP
+============================================================
+
+Para guardar uma cópia dos testes:
+
+FAZER-BACKUP-HOMOLOGACAO-WINDOWS.bat
+
+============================================================
+ZERAR OS TESTES
+============================================================
+
+Para apagar somente os dados da homologação:
+
+RESETAR-HOMOLOGACAO-WINDOWS.bat
+
+O programa pede a frase:
+APAGAR TESTES
+
+antes de excluir qualquer dado.
+
+============================================================
+O QUE TESTAR
+============================================================
+
+- Clientes
+- Fornecedores
+- Produtos
+- Matérias-primas
+- Pré-fabricados
+- Estoque
+- Compras
+- Vendas
+- Financeiro
+- Fichas técnicas
+- PCP
+- Ordens de produção
+- Kanban
+- Produzir do zero
+- Baú blindado
+- Retirar do estoque de vazado
+- Entregas
+- Rotas
+- Cadastro de colaborador PF
+- Cadastro de colaborador MEI
+- Endereço
+- Vale-transporte
+- Contatos de emergência
+- Filhos e dependentes
+- Pensão alimentícia
+- Dados bancários
+- Bônus
+- Produção por peça
+- Documentos de TESTE
+- Impressão da ficha cadastral
+- Fechar e abrir o sistema para confirmar que os dados continuam salvos
+
+============================================================
+COMO REGISTRAR UM PROBLEMA
+============================================================
+
+Ao encontrar um problema, anote:
+
+1. Tela onde aconteceu
+2. O que tentou fazer
+3. O que esperava acontecer
+4. O que realmente aconteceu
+5. Print da tela
+6. Horário aproximado
+
+Isso facilita a correção.

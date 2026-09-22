@@ -1,0 +1,20 @@
+FÁCIL PEDIDO ERP V18.1.1 — LOCAIS DE ESTOQUE
+
+Correções:
+- Instalações sem locais de estoque recebem automaticamente quatro locais operacionais padrão:
+  * Estoque Principal (EST-PRINCIPAL)
+  * Matéria-prima (MAT-PRIMA)
+  * Expedição (EXPEDICAO)
+  * Quarentena / Avarias (QUARENTENA)
+- O bootstrap é idempotente: se já existir qualquer local, nenhum local do cliente é alterado ou substituído.
+- O cadastro de produto exibe Nome + Código + informações físicas do local.
+- Se o front abrir antes de carregar os locais, ele consulta o backend novamente.
+- Se realmente não houver nenhum local, a tela permite criar o Estoque Principal sem sair do cadastro.
+- O produto salva o ID real do local e mantém o nome/código para exibição.
+- Cache do Service Worker atualizado para evitar servir a tela antiga após redeploy.
+
+Validação:
+- Python: OK
+- JavaScript inline (frontend/public): OK
+- Testes automatizados: 54/54 aprovados
+- Teste de banco vazio: 4 locais padrão criados e retornados pela API

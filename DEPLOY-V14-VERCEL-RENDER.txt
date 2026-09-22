@@ -1,0 +1,33 @@
+FÁCIL PEDIDO V14 — ARQUITETURA DE HOMOLOGAÇÃO
+
+FRONT-END
+- Hospedar somente o conteúdo da pasta frontend/ na Vercel.
+- No sistema publicado, abrir Central de Diagnóstico e informar a URL pública do FastAPI.
+- Nunca colocar DATABASE_URL ou senha do PostgreSQL no frontend/Vercel.
+
+BACKEND FASTAPI
+Variáveis mínimas:
+ENVIRONMENT=homologation
+AUTH_DISABLED=true   (somente enquanto estiver testando)
+AUTO_CREATE_TABLES=false
+DATABASE_URL=postgresql+psycopg://...
+CORS_ORIGINS=https://SEU-PROJETO.vercel.app
+SECRET_KEY=uma-chave-longa-e-aleatoria
+
+Build:
+pip install -r requirements.txt
+
+Antes de iniciar uma versão nova:
+alembic upgrade head
+
+Start:
+uvicorn app.main:app --host 0.0.0.0 --port $PORT
+
+PRODUÇÃO
+Antes de liberar usuários reais:
+- AUTH_DISABLED=false
+- criar perfis/usuários reais
+- rotacionar credenciais do PostgreSQL
+- banco com backup persistente
+- testar login e permissões
+- testar em dois computadores simultaneamente

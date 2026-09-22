@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: facil-pedido-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: facilpedido
+      POSTGRES_USER: facilpedido
+      POSTGRES_PASSWORD: troque_a_senha
+    ports:
+      - "5432:5432"
+    volumes:
+      - facil_pedido_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U facilpedido -d facilpedido"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  facil_pedido_postgres:

@@ -1,0 +1,16 @@
+{
+  "version": "18.0.0-persistencia-fix",
+  "date": "2026-09-16",
+  "checks": {
+    "javascript_syntax_frontend": "passed",
+    "javascript_syntax_public": "passed",
+    "pytest_full_suite": "40 passed",
+    "automatic_first_open_data_wipe": "disabled",
+    "local_cache_fallback": "enabled",
+    "postgresql_front_state": "enabled",
+    "revision_conflict_protection": "enabled",
+    "authenticated_reconnect_remote_restore": "enabled",
+    "vercel_fastapi_entrypoint": "present",
+    "production_auth_required": true
+  }
+}

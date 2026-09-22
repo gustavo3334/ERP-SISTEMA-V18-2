@@ -1,0 +1,33 @@
+FÁCIL PEDIDO ERP — V14 OPERACIONAL / HOMOLOGAÇÃO
+================================================
+
+BACKEND
+- DATABASE_URL postgresql:// é normalizada automaticamente para postgresql+psycopg://.
+- Corrigida migration 0005 para revision ID menor que 32 caracteres.
+- Health check agora executa SELECT 1 no banco.
+- Transferência de estoque atômica: POST /api/v1/inventory/transfer.
+- Corrigida duplicação potencial de saldo ao criar novo local de estoque.
+- Compra: leitura individual e cancelamento seguro.
+- Usuários: editar, resetar senha e excluir com proteção do último administrador.
+- CRUD genérico recebeu permissões read/write por módulo.
+- Quotes, ficha técnica e produção receberam RBAC específico.
+
+FRONTEND
+- V13 integrada ao projeto completo.
+- Compras passam a gravar no FastAPI e podem receber saldo no estoque/financeiro.
+- Financeiro passa a listar e criar FinancialEntry real.
+- Receber/Pagar altera status no backend.
+- Transferência de estoque usa o endpoint atômico.
+- Marketplace entra em modo seguro de implantação, sem operações falsas.
+- Autenticação real pode ser exigida por fp_auth_mode=required.
+- API bridge já envia Bearer token automaticamente.
+
+ANTES DO GO-LIVE
+- Usar PostgreSQL pago/persistente com backup.
+- Trocar todas as credenciais expostas.
+- AUTH_DISABLED=false.
+- SECRET_KEY forte.
+- CORS_ORIGINS restrito ao domínio real da Vercel.
+- Criar administrador real pelo processo de implantação.
+- Rodar alembic upgrade head.
+- Rodar pytest.

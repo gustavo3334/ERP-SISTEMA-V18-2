@@ -1,0 +1,33 @@
+{
+  "version": "18.2.0",
+  "target": "Vercel + Supabase PostgreSQL",
+  "automated_tests": {
+    "command": "python -m pytest -q",
+    "passed": 72,
+    "failed": 0
+  },
+  "syntax": {
+    "python_compileall": "ok",
+    "javascript_external_files": "ok",
+    "frontend_inline_scripts": 21,
+    "public_inline_scripts": 21
+  },
+  "serverless_safety": {
+    "startup_configuration_errors_do_not_crash_function": true,
+    "health_endpoint_remains_available": true,
+    "database_errors_are_returned_as_controlled_503": true,
+    "supabase_transaction_pooler_6543_detected": true,
+    "psycopg_prepared_statements_disabled_on_6543": true,
+    "sqlalchemy_nullpool_for_serverless_pooler": true
+  },
+  "database": {
+    "supported": [
+      "Supabase Transaction Pooler :6543",
+      "Supabase Session Pooler :5432",
+      "standard PostgreSQL",
+      "SQLite for local development"
+    ],
+    "live_supabase_connection_tested": false,
+    "note": "A conexão real depende da DATABASE_URL privada do usuário e deve ser validada após o deploy em /api/v1/health e /api/v1/ready."
+  }
+}

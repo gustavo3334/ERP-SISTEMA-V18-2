@@ -1,0 +1,45 @@
+FÁCIL PEDIDO ERP — PERSISTÊNCIA DOS DADOS
+
+Use o sistema por:
+ABRIR-SISTEMA-WINDOWS.bat
+
+Quando aparecer:
+✓ Salvo no sistema
+
+o estado do front foi sincronizado com o backend e com o banco local.
+
+O banco local fica em:
+data\facil_pedido.db
+
+O sistema também mantém uma segunda cópia no navegador.
+
+CADASTROS COBERTOS PELA PERSISTÊNCIA:
+- clientes
+- fornecedores
+- produtos
+- matérias-primas
+- pré-fabricados
+- estoque
+- fichas técnicas
+- PCP
+- ordens de produção
+- entregas
+- RH
+- colaboradores PF e MEI
+- endereços
+- saúde
+- dependentes
+- pensão
+- dados bancários
+- anexos locais
+- bônus
+- valores por peça
+- apontamentos de produção
+- demais registros criados pelo front
+
+BACKUP:
+Execute FAZER-BACKUP-WINDOWS.bat para copiar o banco para a pasta backup.
+
+IMPORTANTE:
+Não use RESETAR-BANCO-LOCAL-WINDOWS.bat com dados reais, porque ele apaga
+o banco SQLite local.

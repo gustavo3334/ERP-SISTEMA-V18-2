@@ -1,0 +1,23 @@
+FÁCIL PEDIDO ERP — PREPARAR PARA USO REAL
+
+ANTES DE COLOCAR DADOS REAIS:
+
+1. Faça uma cópia completa do projeto.
+2. Configure .env.
+3. Troque SECRET_KEY por uma chave longa e exclusiva.
+4. Para vários computadores, configure PostgreSQL.
+5. Ative autenticação quando a tela de login for liberada:
+
+AUTH_DISABLED=false
+SEED_ADMIN=true
+ADMIN_EMAIL=seu-email@empresa.com
+ADMIN_PASSWORD=uma-senha-forte
+
+6. Execute ABRIR-SISTEMA-WINDOWS.bat.
+7. Acesse /docs e valide a API.
+8. Execute VERIFICAR-SISTEMA-WINDOWS.bat.
+9. Configure rotina de backup do banco e da pasta storage\uploads.
+10. Em ambiente online, use HTTPS e armazenamento persistente para documentos.
+
+DADOS SENSÍVEIS:
+Ficha de saúde, documentos, salários e dados bancários devem ficar restritos a perfis autorizados.

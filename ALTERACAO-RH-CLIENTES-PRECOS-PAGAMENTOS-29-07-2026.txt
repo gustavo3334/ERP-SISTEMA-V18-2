@@ -1,0 +1,41 @@
+FÁCIL PEDIDO ERP — AJUSTES DE RH E CLIENTES — 29/07/2026
+
+1. RH / COLABORADORES
+- Adicionado filtro separado por vínculo:
+  - Registrado
+  - Sem registro
+  - MEI
+- O filtro de situação continua independente:
+  - Ativo, Afastado, Férias, Desligado
+- Badge Registrado permanece verde.
+- Badge MEI fica azul.
+- Sem registro nunca aparece verde: começa em laranja, passa a amarelo de alerta e vermelho conforme o tempo sem registro.
+
+2. CLIENTES — FORMAS DE PAGAMENTO
+- O cliente pode ter várias formas de pagamento aceitas.
+- Opções: PIX, cartão de crédito, cartão de débito, boleto, dinheiro, transferência e faturado.
+- Também existe a forma de pagamento preferencial.
+- Dados ficam no snapshot universal e em tabela relacional do PostgreSQL.
+
+3. CLIENTES — TABELA DE PREÇOS INDIVIDUAL
+- Cada cliente pode ter preço próprio por produto.
+- Exemplo: o mesmo BAU 138 pode custar R$ 320 para um cliente e R$ 410 para outro.
+- O cadastro permite adicionar/remover quantos produtos forem necessários.
+- Ao abrir um orçamento, o preço personalizado do cliente é aplicado primeiro.
+- Sem preço personalizado, o sistema usa o preço padrão do produto.
+- O backend de pedidos também usa a tabela do cliente quando o preço unitário não é informado.
+
+4. PERSISTÊNCIA
+- Nova cópia relacional de clientes no PostgreSQL.
+- Endpoint de reconstrução do front: GET /api/v1/client-management/front/state
+- Sincronização: PUT /api/v1/client-management/sync/front
+- Tabela: client_product_prices
+- Migration: 0007_clientes_precos_pagamentos
+- Exclusões de clientes também são refletidas na camada relacional.
+
+VALIDAÇÃO
+- Python: OK
+- JavaScript: OK
+- 33 testes automatizados aprovados
+- Alembic banco novo: OK
+- Alembic atualização 0006 -> 0007: OK

@@ -1,0 +1,2 @@
+
+V15: Marketplace removido do frontend ativo e das rotas visuais.

@@ -1,0 +1,31 @@
+FÁCIL PEDIDO ERP — CORREÇÃO DE PERSISTÊNCIA DO RH
+Data: 29/07/2026
+
+Problema corrigido:
+- Colaboradores estavam salvos no PostgreSQL, mas o front iniciava com rhEmployees vazio.
+- A tela de RH não reconstruía os colaboradores a partir do banco ao abrir o sistema.
+
+Correções aplicadas:
+1. PostgreSQL passou a ser a fonte oficial do RH.
+2. Novo endpoint GET /api/v1/employees/front/state.
+3. O front carrega colaboradores, valores por peça e apontamentos do banco ao iniciar.
+4. A sincronização de escrita só começa depois da hidratação inicial.
+5. Se o banco estiver vazio e houver cache local, o sistema preserva e migra o cache.
+6. O payload completo do front é preservado em employees.front_payload_json.
+7. O tipo do colaborador passou a ter coluna relacional employee_type.
+8. Exclusão de colaborador agora exclui também no backend por legacy_id.
+9. Nova migration Alembic 0004_rh_front_authoritative.
+10. Após carregar o banco, o snapshot geral é atualizado para manter compatibilidade.
+
+Deploy no Render:
+- O Start Command já utilizado pode continuar:
+  alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+
+Após o push no GitHub, o Render com Auto-Deploy deve executar a migration 0004 automaticamente.
+
+Validações realizadas:
+- Python compileall: OK
+- JavaScript node --check: OK
+- Pytest: 20 testes aprovados
+- Alembic em banco novo: OK
+- Alembic atualizando banco existente da revisão 0003 para 0004: OK

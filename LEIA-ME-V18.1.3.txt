@@ -1,0 +1,15 @@
+FÁCIL PEDIDO ERP V18.1.3 — CORREÇÃO DEFINITIVA DO LOCAL DE ESTOQUE
+
+1) Extraia o ZIP em uma pasta NOVA.
+2) Abra diretamente essa pasta no VS Code. Nesta versão os arquivos do projeto estão na raiz do ZIP; não deve existir uma segunda pasta do projeto dentro dela.
+3) Rode:
+   python -m venv .venv
+   Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned
+   .\.venv\Scripts\Activate.ps1
+   python -m pip install -r requirements-dev.txt
+   python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+4) Abra http://127.0.0.1:8000
+5) Em Estoque & Compras > Novo produto, o subtítulo deve mostrar "v18.1.3".
+6) O campo Local de estoque deve listar automaticamente Estoque Principal, Matéria-prima, Expedição e Quarentena / Avarias.
+
+A V18.1.3 desativa e remove caches/service workers antigos quando executada em localhost, consulta /api/v1/stock-locations antes de abrir o cadastro de produto e impede cache de index.html/config.js durante desenvolvimento.

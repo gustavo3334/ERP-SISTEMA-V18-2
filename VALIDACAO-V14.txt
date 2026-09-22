@@ -1,0 +1,14 @@
+VALIDAÇÃO AUTOMÁTICA — FÁCIL PEDIDO V14
+
+- Python compileall: OK
+- JavaScript externo: OK
+- JavaScript inline: OK
+- Alembic upgrade head em banco limpo: OK
+- Revision IDs críticos <= 32 caracteres: OK
+- pytest: 35 testes aprovados
+- Transferência de estoque atômica: testada
+- Transferência respeitando estoque reservado: testada
+- Produto total não duplica ao criar novo local: testado
+- Health check valida conexão real com o banco
+
+Esta validação cobre testes automatizados. Ainda é necessária homologação manual no navegador e teste em dois computadores com o backend PostgreSQL publicado.

@@ -1,0 +1,29 @@
+FÁCIL PEDIDO ERP — ROTAS COM GOOGLE MAPS
+
+O sistema já calcula rota de carro sem chave no modo de desenvolvimento,
+usando OpenStreetMap/Nominatim + OSRM.
+
+Para uso profissional e para liberar os modos Transporte público, A pé,
+Bicicleta e Moto, configure uma chave da Google Maps Platform.
+
+1. No Google Cloud, habilite no mesmo projeto:
+   - Geocoding API
+   - Routes API
+
+2. Gere/restrinja uma API Key.
+
+3. Abra o arquivo .env deste projeto e altere:
+
+ROUTE_PROVIDER=google
+GOOGLE_MAPS_API_KEY=COLE_SUA_CHAVE_AQUI
+
+4. Salve o arquivo.
+5. Feche o servidor se estiver aberto.
+6. Execute ABRIR-SISTEMA-WINDOWS.bat novamente.
+
+Teste em:
+http://127.0.0.1:8000/api/v1/routes/provider
+
+O resultado deve mostrar:
+"effective": "google"
+"google_configured": true

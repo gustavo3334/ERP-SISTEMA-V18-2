@@ -1,0 +1,15 @@
+FÁCIL PEDIDO ERP — PAINÉIS SEM DADOS FICTÍCIOS
+Data: 29/07/2026
+
+Alterações:
+- Ficha técnica / custo estimado: removidos produto e valores de demonstração.
+- Vendas / linha do tempo: removidos cliente, totais, entrada, saldo e data fictícios.
+- Vendas / comissões: removidos vendedores, volumes, faturamento, taxa e comissão fictícios.
+- Financeiro / DRE: removidos impostos, custos, despesas e resultado fictícios.
+- Campos permanecem em branco até receber dados reais.
+- Adicionados IDs estáveis para integração com backend.
+- Adicionada API JS window.fpRealPanels para renderizadores reais preencherem os painéis.
+
+Esta versão mantém:
+- correção de persistência do RH via PostgreSQL;
+- categoria e tamanho/medida opcionais no cadastro de produto.

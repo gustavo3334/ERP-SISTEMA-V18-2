@@ -1,0 +1,81 @@
+/* Fácil Pedido — acabamento de pré-produção sem alterar a identidade original */
+
+:root{
+  --fp-ready:#16a34a;
+  --fp-warn:#d97706;
+  --fp-off:#dc2626;
+}
+
+button,.btn,.nav-btn,.icon-btn,.card,.module-card{
+  transition:transform .16s ease, box-shadow .16s ease, border-color .16s ease, background .16s ease, opacity .16s ease;
+}
+button:focus-visible,.btn:focus-visible,.nav-btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{
+  outline:3px solid color-mix(in srgb,var(--primary) 28%, transparent);
+  outline-offset:2px;
+}
+.card:hover{
+  border-color:color-mix(in srgb,var(--primary) 18%,var(--line));
+}
+.kpi:hover{
+  transform:translateY(-1px);
+  box-shadow:0 10px 28px rgba(15,23,42,.06);
+}
+.table-wrap{
+  scrollbar-width:thin;
+  scrollbar-color:color-mix(in srgb,var(--muted) 45%,transparent) transparent;
+}
+.topbar{
+  box-shadow:0 1px 0 rgba(15,23,42,.02);
+}
+#fpOpsPill{
+  display:flex;align-items:center;gap:7px;height:36px;padding:0 10px;border:1px solid var(--line);
+  background:var(--panel);color:var(--text);border-radius:11px;font-size:10px;font-weight:800;white-space:nowrap;
+}
+#fpOpsPill .fp-dot{width:8px;height:8px;border-radius:50%;background:var(--fp-warn);box-shadow:0 0 0 4px rgba(217,119,6,.08)}
+#fpOpsPill[data-state="online"] .fp-dot{background:var(--fp-ready);box-shadow:0 0 0 4px rgba(22,163,74,.10)}
+#fpOpsPill[data-state="offline"] .fp-dot{background:var(--fp-off);box-shadow:0 0 0 4px rgba(220,38,38,.10)}
+#fpOpsPill[data-state="local"] .fp-dot{background:#2563eb;box-shadow:0 0 0 4px rgba(37,99,235,.10)}
+
+.fp-ops-modal{
+  position:fixed;inset:0;z-index:2147483000;display:none;place-items:center;padding:18px;background:rgba(15,23,42,.56);
+  backdrop-filter:blur(7px)
+}
+.fp-ops-modal.show{display:grid}
+.fp-ops-dialog{
+  width:min(820px,96vw);max-height:90vh;overflow:auto;background:var(--panel);color:var(--text);
+  border:1px solid var(--line);border-radius:20px;box-shadow:0 30px 90px rgba(2,6,23,.28)
+}
+.fp-ops-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:18px 20px;border-bottom:1px solid var(--line)}
+.fp-ops-head h3{margin:0;font-size:18px}.fp-ops-head p{margin:4px 0 0;color:var(--muted);font-size:11px}
+.fp-ops-body{padding:18px 20px}
+.fp-ops-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.fp-ops-card{border:1px solid var(--line);border-radius:15px;padding:14px;background:var(--panel-2)}
+.fp-ops-card strong{display:block;font-size:12px}.fp-ops-card small{display:block;color:var(--muted);margin-top:5px;line-height:1.45}
+.fp-ops-value{font-size:18px;font-weight:850;margin-top:8px;word-break:break-word}
+.fp-ops-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.fp-ops-actions button{border:1px solid var(--line);border-radius:11px;background:var(--panel);color:var(--text);padding:9px 11px;font-weight:750;font-size:11px}
+.fp-ops-actions button.primary{background:var(--primary);border-color:var(--primary);color:#fff}
+.fp-ops-actions button.danger{background:#fff1f2;border-color:#fecdd3;color:#be123c}
+.fp-ops-field{margin-top:14px}.fp-ops-field label{display:block;font-size:10px;font-weight:800;color:var(--muted);margin-bottom:6px}
+.fp-ops-field input{width:100%;border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:11px;padding:11px 12px}
+.fp-test-list{display:grid;gap:7px;margin-top:12px}
+.fp-test-row{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid var(--line);border-radius:11px;padding:9px 11px;font-size:11px}
+.fp-test-row span:last-child{font-weight:800}
+.fp-ok{color:#15803d}.fp-bad{color:#b91c1c}.fp-warn{color:#b45309}
+
+.fp-empty-search{padding:16px;text-align:center;color:var(--muted);font-size:11px}
+.fp-search-kind{margin-left:auto}
+.fp-recovery-note{
+  position:fixed;right:14px;bottom:58px;z-index:9998;max-width:330px;padding:10px 12px;border:1px solid var(--line);
+  border-radius:12px;background:var(--panel);box-shadow:var(--shadow);font-size:10px;color:var(--muted);display:none
+}
+.fp-recovery-note.show{display:block}
+
+@media(max-width:1100px){
+  #fpOpsPill .fp-label{display:none}
+}
+@media(max-width:760px){
+  #fpOpsPill{display:none}
+  .fp-ops-grid{grid-template-columns:1fr}
+  .fp-ops-dialog{border-radius:16px}
+}

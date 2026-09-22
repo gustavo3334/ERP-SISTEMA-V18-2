@@ -1,0 +1,14 @@
+{
+  "version": "18.1.2",
+  "status": "approved",
+  "tests": {"passed": 58, "failed": 0},
+  "javascript": "ok",
+  "fixes": [
+    "apiList helper restored",
+    "safeApi helper restored",
+    "stock locations reload when product form opens",
+    "invalid legacy stock locations ignored",
+    "default stock locations ensured individually",
+    "service worker cache bumped"
+  ]
+}

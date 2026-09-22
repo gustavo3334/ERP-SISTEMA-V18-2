@@ -1,0 +1,17 @@
+ALTERACAO - CADASTRO DE PRODUTO
+Data: 29/07/2026
+
+Ajustes realizados no formulario Novo produto:
+
+1. Categoria deixou de ser obrigatoria.
+2. O formulario agora permite selecionar "Sem categoria".
+3. O sistema nao seleciona automaticamente a primeira categoria cadastrada.
+4. Tamanho / medida continua livre e opcional, agora indicado explicitamente na tela.
+5. Produto pode ser salvo sem categoria e sem tamanho/medida.
+6. O backend ja aceita category_id nulo, portanto nao foi necessaria alteracao de banco ou migration.
+7. A persistencia do RH corrigida na versao anterior foi mantida integralmente.
+
+Validacao:
+- JavaScript: OK
+- Python: OK
+- Testes automatizados: 20 aprovados

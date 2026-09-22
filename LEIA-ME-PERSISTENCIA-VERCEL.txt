@@ -1,0 +1,23 @@
+PERSISTÊNCIA NA VERCEL — V18.2 + SUPABASE
+=========================================
+
+Os dados de produção devem ficar no PostgreSQL do Supabase, nunca em SQLite dentro da Vercel.
+
+Use na Vercel:
+DATABASE_URL=<connection string Supabase>
+ENVIRONMENT=production
+AUTH_DISABLED=false
+AUTO_CREATE_TABLES=true
+SECRET_KEY=<32+ caracteres>
+
+Primeiro teste com:
+SEED_ADMIN=false
+
+Depois abra /api/v1/health. O esperado é:
+backend=online
+database=connected
+configuration=ok
+
+Só depois ative SEED_ADMIN=true e configure ADMIN_EMAIL / ADMIN_PASSWORD.
+
+Com DATABASE_URL apontando para Supabase, fechar navegador, reiniciar funções ou fazer novos deploys não apaga os cadastros.

@@ -1,0 +1,9 @@
+V18.1.2 — CORREÇÃO LOCAL DE ESTOQUE
+
+1. Corrigido helper apiList ausente no front-end, que impedia a Engenharia de hidratar locais/categorias/variações.
+2. Corrigido helper safeApi ausente.
+3. O cadastro de produto agora consulta /api/v1/stock-locations sempre que abre e reconstrói o campo Local de estoque.
+4. Registros de local vazios/legados são ignorados no select.
+5. O backend garante individualmente os 4 locais padrão, mesmo se já existir algum registro legado na tabela.
+6. Botão Criar Estoque Principal recebe o evento explicitamente.
+7. Cache do service worker atualizado para V18.1.2.
