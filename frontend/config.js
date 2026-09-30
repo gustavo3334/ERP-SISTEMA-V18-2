@@ -5,5 +5,5 @@
   sem editar o arquivo. A URL fica salva apenas no navegador.
 */
 window.FP_API_BASE = window.FP_API_BASE || "";
-window.FP_FRONT_VERSION = "18.2.0-supabase-ready";
+window.FP_FRONT_VERSION = "18.2.1-sync-session-fix";
 window.FP_AUTH_REQUIRED = true;

@@ -28,6 +28,7 @@
     pill.querySelector(".fp-label").textContent = text;
   }
 
+
   async function testBackend(){
     setPill("checking","Verificando...");
     try{
@@ -36,14 +37,79 @@
       });
       if(!response.ok) throw new Error(`HTTP ${response.status}`);
       const body = await response.json().catch(()=>({}));
-      lastBackendCheck = {ok:true, status:response.status, body, at:new Date().toISOString()};
+
+      const authRequired =
+        Boolean(window.FP_AUTH_REQUIRED) ||
+        localStorage.getItem("fp_auth_mode") === "required";
+      const token = localStorage.getItem("access_token");
+
+      if(authRequired){
+        if(!token){
+          lastBackendCheck = {
+            ok:true, authenticated:false, status:response.status, body,
+            at:new Date().toISOString()
+          };
+          setPill("checking","Login necessário");
+          refreshOpsModal();
+          return lastBackendCheck;
+        }
+
+        const authResponse = await fetch("/api/v1/auth/me", {
+          headers: {"Accept":"application/json","Cache-Control":"no-cache"}
+        });
+
+        if(authResponse.status === 401 || authResponse.status === 403){
+          localStorage.removeItem("access_token");
+          localStorage.removeItem("fp_logged");
+
+          const login=document.getElementById("login");
+          const erp=document.getElementById("erp");
+          const message=document.getElementById("loginAccessMessage");
+
+          if(message){
+            message.textContent="Sua sessão expirou. Entre novamente para continuar.";
+            message.classList.add("show");
+          }
+          if(erp)erp.classList.add("hidden");
+          if(login){
+            login.classList.remove("hidden");
+            login.style.display="";
+            login.setAttribute("aria-hidden","false");
+          }
+
+          lastBackendCheck = {
+            ok:true, authenticated:false, status:authResponse.status, body,
+            at:new Date().toISOString()
+          };
+          setPill("checking","Sessão expirada");
+          refreshOpsModal();
+          return lastBackendCheck;
+        }
+
+        if(!authResponse.ok) throw new Error(`HTTP ${authResponse.status}`);
+      }
+
+      lastBackendCheck = {
+        ok:true,
+        authenticated:!authRequired || Boolean(token),
+        status:response.status,
+        body,
+        at:new Date().toISOString()
+      };
       setPill("online","Backend conectado");
       refreshOpsModal();
       return lastBackendCheck;
     }catch(error){
-      lastBackendCheck = {ok:false, error:String(error.message||error), at:new Date().toISOString()};
+      lastBackendCheck = {
+        ok:false,
+        error:String(error.message||error),
+        at:new Date().toISOString()
+      };
       const localOnly = location.protocol === "file:" && !window.fpGetApiBase?.();
-      setPill(localOnly ? "local" : "offline", localOnly ? "Modo local" : "Backend offline");
+      setPill(
+        localOnly ? "local" : "offline",
+        localOnly ? "Modo local" : "Backend offline"
+      );
       refreshOpsModal();
       return lastBackendCheck;
     }

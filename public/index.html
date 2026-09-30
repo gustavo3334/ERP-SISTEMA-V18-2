@@ -9295,39 +9295,75 @@ try { if (state.universalCreatedRecords && typeof universalCreatedRecords !== "u
     });
   }
 
+
+  let saveIndicatorTimer = null;
+
   function setSaveIndicator(text, state = "saved") {
     let el = document.getElementById("fpPersistenceIndicator");
     if (!el) {
       el = document.createElement("div");
       el.id = "fpPersistenceIndicator";
       el.style.cssText = [
-        "position:fixed", "right:12px", "bottom:52px", "z-index:10020",
+        "position:fixed", "right:12px", "bottom:18px", "z-index:10020",
         "padding:7px 10px", "border-radius:999px", "font:800 10px Inter,Arial,sans-serif",
         "box-shadow:0 8px 24px rgba(15,23,42,.16)", "transition:.2s ease", "pointer-events:none"
       ].join(";");
       document.body.appendChild(el);
     }
     el.textContent = text;
+    el.style.opacity = "1";
+    el.style.transform = "translateY(0)";
     if (state === "saving") { el.style.background="#fef3c7"; el.style.color="#92400e"; }
     else if (state === "error") { el.style.background="#fee2e2"; el.style.color="#991b1b"; }
     else if (state === "warning") { el.style.background="#ffedd5"; el.style.color="#9a3412"; }
     else { el.style.background="#dcfce7"; el.style.color="#166534"; }
+
+    clearTimeout(saveIndicatorTimer);
+    const delay = (state === "error" || state === "warning") ? 4800 : 2200;
+    saveIndicatorTimer = setTimeout(() => {
+      const current = document.getElementById("fpPersistenceIndicator");
+      if (!current) return;
+      current.style.opacity = "0";
+      current.style.transform = "translateY(8px)";
+      setTimeout(() => current.remove(), 220);
+    }, delay);
   }
 
   function setBackendIndicator(text, state = "ok") {
-    let element = document.getElementById("backendConnectionIndicator");
-    if (!element) {
-      element = document.createElement("span");
-      element.id = "backendConnectionIndicator";
-      element.style.cssText = [
-        "position:fixed", "right:12px", "bottom:12px", "z-index:9999", "padding:8px 11px",
-        "border-radius:999px", "font:700 11px Arial,sans-serif", "box-shadow:0 8px 24px rgba(15,23,42,.18)"
-      ].join(";");
-      document.body.appendChild(element);
+    /* O status principal já existe no topo. Evita um segundo selo flutuante
+       cobrindo a interface no canto inferior direito. */
+    document.getElementById("backendConnectionIndicator")?.remove();
+
+    const pill = document.getElementById("fpOpsPill");
+    if (!pill) return;
+    pill.dataset.state = state === "ok" ? "online" : (state === "auth" ? "checking" : "offline");
+    const label = pill.querySelector(".fp-label");
+    if (label) label.textContent = text;
+  }
+
+  function requireFreshLoginForSync(messageText) {
+    const authRequired =
+      Boolean(window.FP_AUTH_REQUIRED) ||
+      localStorage.getItem("fp_auth_mode") === "required";
+    if (!authRequired) return;
+
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("fp_logged");
+
+    const login = document.getElementById("login");
+    const erp = document.getElementById("erp");
+    const message = document.getElementById("loginAccessMessage");
+
+    if (message) {
+      message.textContent = messageText || "Sua sessão expirou. Entre novamente para continuar.";
+      message.classList.add("show");
     }
-    element.textContent = text;
-    element.style.background = state === "ok" ? "#dcfce7" : "#fee2e2";
-    element.style.color = state === "ok" ? "#166534" : "#991b1b";
+    if (erp) erp.classList.add("hidden");
+    if (login) {
+      login.classList.remove("hidden");
+      login.style.display = "";
+      login.setAttribute("aria-hidden", "false");
+    }
   }
 
   function writeLocalSnapshot(state) {
@@ -9356,8 +9392,14 @@ try { if (state.universalCreatedRecords && typeof universalCreatedRecords !== "u
         headers: {"Accept":"application/json", "Cache-Control":"no-cache"}
       });
       if (response.status === 401 || response.status === 403) {
+        const hadToken = Boolean(localStorage.getItem("access_token"));
         serverAvailable = false;
-        setBackendIndicator("Faça login para sincronizar", "error");
+        setBackendIndicator(hadToken ? "Sessão expirada" : "Login necessário", "auth");
+        requireFreshLoginForSync(
+          hadToken
+            ? "Sua sessão expirou. Entre novamente para continuar com os dados sincronizados."
+            : "Faça login para acessar e sincronizar os dados do sistema."
+        );
         return {authRequired:true, snapshot:null, revision:serverRevision, updatedAt:null};
       }
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -9406,6 +9448,17 @@ try { if (state.universalCreatedRecords && typeof universalCreatedRecords !== "u
         keepalive
       });
 
+      if (response.status === 401 || response.status === 403) {
+        const hadToken = Boolean(localStorage.getItem("access_token"));
+        serverAvailable = false;
+        setBackendIndicator(hadToken ? "Sessão expirada" : "Login necessário", "auth");
+        requireFreshLoginForSync(
+          hadToken
+            ? "Sua sessão expirou. Entre novamente para continuar salvando no servidor."
+            : "Faça login para continuar salvando os dados no servidor."
+        );
+        return false;
+      }
       if (response.status === 409) {
         await resolveRevisionConflict(state);
         return false;
