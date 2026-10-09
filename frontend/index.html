@@ -2064,7 +2064,7 @@ function renderRhEmployeesTable(rows=rhEmployees){
   body.innerHTML=paged.map(e=>`<tr><td><div class="entity-main"><div class="entity-avatar">${e.name.split(" ").map(x=>x[0]).slice(0,2).join("")}</div><div><strong>${e.name}</strong><small>${e.id} · ${e.email}</small></div></div></td><td>${e.cpf}<small style="display:block;color:var(--muted)">RG ${e.rg}</small></td><td><strong>${e.position}</strong><small style="display:block;color:var(--muted)">${e.sector} · ${e.type}</small></td><td>${e.workSchedule}<small style="display:block;color:var(--muted)">Escala ${e.scale}</small></td><td>${formatBRL(e.salary)}<small style="display:block;color:var(--muted)">Bônus fixo ${formatBRL(e.fixedBonus)}</small></td><td>${e.benefits.join(", ")}</td><td>${badge(e.status)}</td><td><div class="table-actions"><button class="btn sm secondary" onclick="openRhEmployeeDetail('${e.id}')">Abrir 360º</button><button class="btn sm secondary" onclick="openRhEmployeeForm('${e.id}')">Editar</button></div></td></tr>`).join("");
   document.getElementById("rhEmployeesPagination").innerHTML=`<span>Mostrando ${rows.length?start+1:0}–${start+paged.length} de ${rows.length}</span><div class="pagination-buttons"><button onclick="changeRhEmployeePage(${Math.max(1,rhEmployeePage-1)})">‹</button>${Array.from({length:totalPages},(_,i)=>i+1).map(p=>`<button class="${p===rhEmployeePage?"active":""}" onclick="changeRhEmployeePage(${p})">${p}</button>`).join("")}<button onclick="changeRhEmployeePage(${Math.min(totalPages,rhEmployeePage+1)})">›</button></div>`;
 }
-function changeRhEmployeePage(page){rhEmployeePage=page;filterRhEmployees()}
+
 function openRhEmployeeDetail(id){
   currentRhEmployeeId=id;openDetail("colaboradorRhDetalhe","rhFolha");setTimeout(()=>renderRhEmployeeDetail(),40);
 }
@@ -2486,18 +2486,32 @@ function getPagedEnterprise(type){
 function renderEnterprisePagination(type,containerId){
   const container=document.getElementById(containerId);if(!container)return;
   const {all,page,totalPages,start,rows}=getPagedEnterprise(type);
-  const startButton=Math.max(1,Math.min(page-2,Math.max(1,totalPages-4)));
-  const buttons=Array.from({length:Math.min(5,totalPages)},(_,i)=>startButton+i).filter(p=>p<=totalPages);
-  container.innerHTML=`<span>Mostrando ${all.length?start+1:0}-${start+rows.length} de ${all.length} registros</span><div class="pagination-buttons"><button type="button" data-enterprise-type="${type}" data-enterprise-page="${Math.max(1,page-1)}" ${page<=1?"disabled":""}>‹</button>${buttons.map(p=>`<button type="button" class="${p===page?"active":""}" data-enterprise-type="${type}" data-enterprise-page="${p}" aria-label="Página ${p}" ${p===page?'aria-current="page"':""}>${p}</button>`).join("")}<button type="button" data-enterprise-type="${type}" data-enterprise-page="${Math.min(totalPages,page+1)}" ${page>=totalPages?"disabled":""}>›</button></div>`;
+  const first=Math.max(1,Math.min(page-2,Math.max(1,totalPages-4)));
+  const pages=Array.from({length:Math.min(5,totalPages)},(_,i)=>first+i).filter(p=>p<=totalPages);
+
+  container.innerHTML=`<span>Mostrando ${all.length?start+1:0}–${start+rows.length} de ${all.length} registros</span>
+    <div class="pagination-buttons">
+      <button type="button" data-fp-enterprise-page="${Math.max(1,page-1)}" ${page<=1?"disabled":""} aria-label="Página anterior">‹</button>
+      ${pages.map(p=>`<button type="button" data-fp-enterprise-page="${p}" class="${p===page?"active":""}" ${p===page?'aria-current="page"':""}>${p}</button>`).join("")}
+      <button type="button" data-fp-enterprise-page="${Math.min(totalPages,page+1)}" ${page>=totalPages?"disabled":""} aria-label="Próxima página">›</button>
+    </div>`;
+
+  container.querySelectorAll("[data-fp-enterprise-page]").forEach(button=>{
+    button.addEventListener("click",()=>{
+      if(button.disabled)return;
+      changeEnterprisePage(type,Number(button.dataset.fpEnterprisePage||1));
+    });
+  });
 }
-window.changeEnterprisePage=function(type,page){
+
+function changeEnterprisePage(type,page){
   if(!enterpriseState?.pages||!enterpriseData?.[type])return;
   const filtered=getEnterpriseFiltered(type);
   const totalPages=Math.max(1,Math.ceil(filtered.length/enterpriseState.pageSize));
-  const target=Math.max(1,Math.min(totalPages,Number(page)||1));
-  enterpriseState.pages[type]=target;
+  enterpriseState.pages[type]=Math.max(1,Math.min(totalPages,Number(page)||1));
   renderEnterpriseEntity(type);
-};
+}
+window.changeEnterprisePage=changeEnterprisePage;
 function entityStatusBadge(status){return badge(status)}
 function renderEnterpriseEntity(type){
   if(type==="suppliers"){
@@ -9044,8 +9058,31 @@ window.renderRhEmployeesTable=function(rows=rhEmployees){
   const body=document.getElementById('rhEmployeesTable');if(!body)return;rhEnsureAll();
   const pageSize=7,totalPages=Math.max(1,Math.ceil(rows.length/pageSize));rhEmployeePage=Math.min(rhEmployeePage,totalPages);const start=(rhEmployeePage-1)*pageSize,paged=rows.slice(start,start+pageSize);
   body.innerHTML=paged.length?paged.map(e=>`<tr><td><div class="entity-main"><div class="entity-avatar" style="overflow:hidden">${rhEmployeePhotoMarkup(e)}</div><div><strong>${rhEsc(e.name)}</strong><small>${rhEsc(e.id)}${e.email?` · ${rhEsc(e.email)}`:''}</small><div style="margin-top:5px">${rhRegistrationBadge(e)}</div></div></div></td><td>${rhEsc(e.cpf||'—')}<small style="display:block;color:var(--muted)">RG ${rhEsc(e.rg||'—')}</small></td><td><strong>${rhEsc(e.position||'—')}</strong><small style="display:block;color:var(--muted)">${rhEsc(e.sector||'—')} · ${rhEsc(e.type||'—')}</small></td><td>${rhEsc(e.workSchedule||'—')}<small style="display:block;color:var(--muted)">Escala ${rhEsc(e.scale||'—')}</small></td><td><strong>${rhMoneyOrDash(e.salary)}</strong><small style="display:block;color:var(--muted)">${e.bonuses.length} bônus cadastrado(s)</small></td><td>${rhEsc(e.employmentCategory||'—')}<small style="display:block;color:var(--muted)">${e.collaboratorModel==='MEI'?'CNPJ '+rhEsc(e.business?.cnpj||'—'):'Início '+rhDate(e.startDate)}</small></td><td>${badge(e.status||'Ativo')}</td><td><div class="table-actions"><button class="btn sm secondary" onclick="openRhEmployeeDetail('${e.id}')">Abrir 360º</button><button class="btn sm secondary" onclick="openRhEmployeeForm('${e.id}')">Editar</button><button class="btn sm danger" onclick="deleteRhEmployee('${e.id}')">Excluir</button></div></td></tr>`).join(''):`<tr><td colspan="8"><div class="empty">Nenhum colaborador cadastrado.</div></td></tr>`;
-  window.__fpLastRhFilteredRows=rows;
-  const pagination=document.getElementById('rhEmployeesPagination');if(pagination)pagination.innerHTML=`<span>Mostrando ${rows.length?start+1:0}-${start+paged.length} de ${rows.length}</span><div class="pagination-buttons"><button type="button" data-rh-page="${Math.max(1,rhEmployeePage-1)}" ${rhEmployeePage<=1?"disabled":""}>‹</button>${Array.from({length:totalPages},(_,i)=>i+1).map(p=>`<button type="button" class="${p===rhEmployeePage?'active':''}" data-rh-page="${p}" ${p===rhEmployeePage?'aria-current="page"':""}>${p}</button>`).join('')}<button type="button" data-rh-page="${Math.min(totalPages,rhEmployeePage+1)}" ${rhEmployeePage>=totalPages?"disabled":""}>›</button></div>`;
+window.__fpLastRhFilteredRows=rows;
+  const pagination=document.getElementById('rhEmployeesPagination');
+  if(pagination){
+    pagination.innerHTML=`<span>Mostrando ${rows.length?start+1:0}–${start+paged.length} de ${rows.length}</span>
+      <div class="pagination-buttons">
+        <button type="button" data-fp-rh-page="${Math.max(1,rhEmployeePage-1)}" ${rhEmployeePage<=1?"disabled":""} aria-label="Página anterior">‹</button>
+        ${Array.from({length:totalPages},(_,i)=>i+1).map(p=>`<button type="button" data-fp-rh-page="${p}" class="${p===rhEmployeePage?'active':''}" ${p===rhEmployeePage?'aria-current="page"':""}>${p}</button>`).join('')}
+        <button type="button" data-fp-rh-page="${Math.min(totalPages,rhEmployeePage+1)}" ${rhEmployeePage>=totalPages?"disabled":""} aria-label="Próxima página">›</button>
+      </div>`;
+    pagination.querySelectorAll("[data-fp-rh-page]").forEach(button=>{
+      button.addEventListener("click",()=>{
+        if(button.disabled)return;
+        changeRhEmployeePage(Number(button.dataset.fpRhPage||1));
+      });
+    });
+  }
+};
+
+window.changeRhEmployeePage=function(page){
+  const rows=window.__fpLastRhFilteredRows||rhEmployees||[];
+  const pageSize=7;
+  const totalPages=Math.max(1,Math.ceil(rows.length/pageSize));
+  rhEmployeePage=Math.max(1,Math.min(totalPages,Number(page)||1));
+  if(typeof filterRhEmployees==="function")filterRhEmployees();
+  else if(typeof renderRhEmployeesTable==="function")renderRhEmployeesTable(rows);
 };
 
 function rhScrollFormSection(id){document.getElementById(id)?.scrollIntoView({behavior:'smooth',block:'start'})}
@@ -9243,14 +9280,6 @@ function printRhEmployeeRegistration(){
   .finance-category-item{grid-template-columns:1fr auto}.finance-category-bar{grid-column:1/-1}
 }
 </style>
-
-
-<style id="paginationV1825Styles">
-.pagination-buttons button{cursor:pointer;user-select:none;touch-action:manipulation}
-.pagination-buttons button:disabled{opacity:.38;cursor:not-allowed}
-.pagination-buttons button:not(:disabled):hover{border-color:var(--primary);color:var(--primary)}
-</style>
-
 </head><body><h1>FICHA CADASTRAL DO COLABORADOR</h1><div class="top"><div class="photo">${e.photo?`<img src="${e.photo}">`:'FOTO'}</div><div><h2 style="border:0;margin:0;font-size:20px">${rhEsc(e.name)}</h2><p>${rhEsc(e.employmentCategory)} · ${rhEsc(e.position||'')} · ${rhEsc(e.sector||'')}</p><p>${rhRegistrationInfo(e).label}</p></div></div><h2>Dados pessoais</h2><div class="grid">${[['CPF',e.cpf],['RG',e.rg],['Nascimento',rhDate(e.birthDate)],['Título de eleitor',e.documentsPersonal.voterTitle],['PIS/PASEP',e.documentsPersonal.pis],['CNH',e.documentsPersonal.cnh],['Telefone 1',e.phonePrimary],['Telefone 2',e.phoneSecondary],['E-mail',e.email],...(e.collaboratorModel==='MEI'?[['CNPJ',e.business.cnpj],['Razão social',e.business.legalName]]:[])].map(x=>`<div class="item"><small>${x[0]}</small><strong>${rhEsc(x[1]||'—')}</strong></div>`).join('')}</div><h2>Endereço</h2><p>${rhEsc(e.address||'—')}</p><h2>Vínculo</h2><div class="grid">${[['Início',rhDate(e.startDate)],['Registro',e.registrationDate?rhDate(e.registrationDate):'—'],['Categoria',e.employmentCategory],['Cargo',e.position],['Setor',e.sector],['Jornada',e.workSchedule],['Salário fixo',rhMoneyOrDash(e.salary)],['Benefícios',e.benefits.join(', ')]].map(x=>`<div class="item"><small>${x[0]}</small><strong>${rhEsc(x[1]||'—')}</strong></div>`).join('')}</div><h2>Contatos de emergência</h2>${e.emergency.map(c=>`<p><strong>${rhEsc(c.name)}</strong> — ${rhEsc(c.relationship)} — ${rhEsc(c.phone)}</p>`).join('')||'<p>Nenhum cadastrado.</p>'}<h2>Filhos e dependentes</h2><table><thead><tr><th>Nome</th><th>Nascimento</th><th>Idade</th><th>Parentesco</th><th>Pensão</th></tr></thead><tbody>${deps}</tbody></table><h2>Dados bancários</h2><div class="grid">${[['Banco',b.bank],['Agência',b.agency],['Conta',[b.account,b.accountDigit].filter(Boolean).join('-')],['PIX',b.pixKey],['Instituição PIX',b.pixInstitution],['Portabilidade',b.portability?'Sim':'Não']].map(x=>`<div class="item"><small>${x[0]}</small><strong>${rhEsc(x[1]||'—')}</strong></div>`).join('')}</div><h2>Ficha de saúde</h2><div class="grid">${[['Doença',h.hasDisease==='Sim'?h.conditions:'Não'],['Tratamento',h.underTreatment==='Sim'?h.treatment:'Não'],['Medicamento contínuo',h.continuousMedication==='Sim'?[h.medication,h.dosage].filter(Boolean).join(' · '):'Não'],['Alergias',h.allergies],['Pode fornecer medicamento?',h.canProvideMedication],['Medicamento autorizado',h.authorizedMedication]].map(x=>`<div class="item"><small>${x[0]}</small><strong>${rhEsc(x[1]||'—')}</strong></div>`).join('')}</div><p style="margin-top:32px">Declaro que as informações acima são verdadeiras e autorizo seu uso para as finalidades administrativas relacionadas ao vínculo com a empresa.</p><div class="sign"><div>Assinatura do colaborador</div><div>Responsável da empresa</div></div><p style="margin-top:35px">Data: ____/____/________</p><script>window.onload=()=>setTimeout(()=>window.print(),300)<\/script></body></html>`);win.document.close();
 }
 
@@ -10514,38 +10543,10 @@ setTimeout(()=>{syncCoreProductsFromEnterprise();renderStockProductsFromEnterpri
 })();
 </script>
 
-
-/* ===== V18.2.5 PAGINACAO ROBUSTA ===== */
-if(!window.__FP_PAGINATION_V1825__){
-  window.__FP_PAGINATION_V1825__=true;
-  document.addEventListener("click",function(event){
-    const enterpriseButton=event.target.closest("button[data-enterprise-page]");
-    if(enterpriseButton){
-      event.preventDefault();
-      event.stopPropagation();
-      const type=enterpriseButton.dataset.enterpriseType;
-      const page=Number(enterpriseButton.dataset.enterprisePage||1);
-      window.changeEnterprisePage?.(type,page);
-      return;
-    }
-    const rhButton=event.target.closest("button[data-rh-page]");
-    if(rhButton){
-      event.preventDefault();
-      event.stopPropagation();
-      const page=Number(rhButton.dataset.rhPage||1);
-      window.changeRhEmployeePage?.(page);
-    }
-  });
-}
-window.changeRhEmployeePage=function(page){
-  const rows=window.__fpLastRhFilteredRows||rhEmployees||[];
-  const pageSize=7;
-  const totalPages=Math.max(1,Math.ceil(rows.length/pageSize));
-  rhEmployeePage=Math.max(1,Math.min(totalPages,Number(page)||1));
-  if(typeof filterRhEmployees==="function")filterRhEmployees();
-  else if(typeof renderRhEmployeesTable==="function")renderRhEmployeesTable(rows);
-};
-/* ===== FIM V18.2.5 PAGINACAO ROBUSTA ===== */
+<script id="paginationV1826Repair">
+/* V18.2.6: marcador de reparo. A paginação é ligada diretamente no render de cada lista. */
+window.__FP_PAGINATION_V1826__=true;
+</script>
 
 </body>
 </html>
