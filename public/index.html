@@ -1350,6 +1350,90 @@
 <div class="card kpi"><div><small>Saldo projetado</small><strong>R$ 0,00</strong><div class="trend">Sem dados cadastrados</div></div><div class="ico">📊</div></div>
 <div class="card kpi"><div><small>Inadimplência</small><strong>0%</strong><div class="trend">Sem dados cadastrados</div></div><div class="ico">⚠️</div></div>
 </div>
+
+<div class="finance-planner-v1824" id="financePlannerV1824">
+  <div class="finance-planner-hero">
+    <div>
+      <small>VISÃO FINANCEIRA DA EMPRESA</small>
+      <h3>Planejamento financeiro</h3>
+      <p>Veja o que entra, o que sai, o que vence e quanto a empresa pode gastar sem perder o controle.</p>
+    </div>
+    <button class="btn secondary" type="button" onclick="fpOpenFinancePlannerSettings()">⚙ Configurar planejamento</button>
+  </div>
+
+  <div class="finance-planner-kpis">
+    <div class="finance-planner-card">
+      <span>💰</span><small>Suas finanças</small>
+      <strong id="fpFinProjectedBalance">R$ 0,00</strong>
+      <em id="fpFinProjectedBalanceHelp">Saldo projetado do mês</em>
+    </div>
+    <div class="finance-planner-card">
+      <span>📅</span><small>Sua semana</small>
+      <strong id="fpFinWeekNet">R$ 0,00</strong>
+      <em id="fpFinWeekHelp">Próximos 7 dias</em>
+    </div>
+    <div class="finance-planner-card">
+      <span>🎯</span><small>Limite do dia</small>
+      <strong id="fpFinDailyLimit">R$ 0,00</strong>
+      <em id="fpFinDailyLimitHelp">Calculado pelo caixa disponível</em>
+    </div>
+    <div class="finance-planner-card">
+      <span>🔁</span><small>Contas fixas</small>
+      <strong id="fpFinFixedBills">R$ 0,00</strong>
+      <em id="fpFinFixedBillsHelp">0 conta(s) recorrente(s)</em>
+    </div>
+    <div class="finance-planner-card">
+      <span>💳</span><small>Fatura / cartão</small>
+      <strong id="fpFinCardBill">R$ 0,00</strong>
+      <em>Despesas no cartão neste mês</em>
+    </div>
+    <div class="finance-planner-card">
+      <span>🏦</span><small>Patrimônio / reservas</small>
+      <strong id="fpFinAssetsTotal">R$ 0,00</strong>
+      <em id="fpFinAssetsHelp">Reservas e investimentos cadastrados</em>
+    </div>
+  </div>
+
+  <div class="grid two finance-planner-row">
+    <div class="card">
+      <div class="card-title">
+        <div><h3>Gastos por categoria</h3><small>Onde o dinheiro da empresa está saindo</small></div>
+      </div>
+      <div id="fpFinCategories" class="finance-category-list"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">
+        <div><h3>Próximos vencimentos</h3><small>Receitas e despesas que exigem atenção</small></div>
+      </div>
+      <div id="fpFinUpcoming" class="finance-upcoming-list"></div>
+    </div>
+  </div>
+
+  <div class="grid two finance-planner-row">
+    <div class="card">
+      <div class="card-title">
+        <div><h3>Metas financeiras</h3><small>Objetivos da empresa</small></div>
+        <button class="btn sm" type="button" onclick="fpOpenFinanceGoal()">＋ Meta</button>
+      </div>
+      <div id="fpFinGoals" class="finance-goal-list"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">
+        <div><h3>Investimentos e patrimônio</h3><small>Reservas, aplicações e bens controlados</small></div>
+        <button class="btn sm" type="button" onclick="fpOpenFinanceAsset()">＋ Item</button>
+      </div>
+      <div id="fpFinAssets" class="finance-asset-list"></div>
+    </div>
+  </div>
+
+  <div class="card finance-planner-row">
+    <div class="card-title">
+      <div><h3>Contas da empresa</h3><small>Movimentações separadas por conta / banco</small></div>
+    </div>
+    <div id="fpFinAccounts" class="finance-account-grid"></div>
+  </div>
+</div>
+
 <div class="tabs" data-tabs="finTabs">
 <button class="tab active" data-tab="finCash">Fluxo de caixa</button><button class="tab" data-tab="finReceivables">A receber</button><button class="tab" data-tab="finPayables">A pagar</button><button class="tab" data-tab="finDRE">DRE</button><button class="tab" data-tab="finCollections">Cobrança</button>
 </div>
@@ -3458,7 +3542,11 @@ const data = {
   suppliers:[],
   purchases:[],
   receivables:[],
-  payables:[]
+  payables:[],
+  financeGoals:[],
+  financeAssets:[],
+  financeMeta:[],
+  financeSettings:[]
 };
 
 function badge(v){
@@ -3605,7 +3693,7 @@ function modalFields(type){
   if(type==="customer") return `<div class="grid form-grid"><div class="field"><label>Nome / Razão social</label><input required oninput="markDirty()"></div><div class="field"><label>CPF / CNPJ</label><input data-mask="document" oninput="markDirty()"></div><div class="field"><label>Telefone</label><input data-mask="phone" oninput="markDirty()"></div><div class="field"><label>E-mail</label><input type="email" oninput="markDirty()"></div><div class="field"><label>CEP</label><input data-mask="cep" placeholder="00000-000" oninput="markDirty()"></div><div class="field"><label>Responsável comercial</label><select onchange="markDirty()"><option>Gustavo</option><option>Ahmad</option></select></div><div class="field"><label>Origem</label><select onchange="markDirty()"><option>Indicação</option><option>Instagram</option><option>Google</option><option>WhatsApp</option></select></div><div class="field"><label>Limite de crédito</label><input data-money oninput="markDirty()"></div><div class="field" style="grid-column:1/-1"><label>Endereço</label><input oninput="markDirty()"></div></div>`;
   if(type==="catalog") return `<div class="grid module-grid">${["BAU 138 Suede Cinza","BOX 69 Linhão Marrom","Colchão Serenity"].map((n,i)=>`<div class="card module-card"><div class="ico">🛏️</div><h3>${n}</h3><p>Preço: R$ ${[1490,1240,1980][i].toLocaleString("pt-BR")},00</p><button class="btn sm" onclick="toast('Produto adicionado')">Adicionar</button></div>`).join("")}</div>`;
   if(type==="purchase") return `<div class="form-section"><div class="form-section-title">🛍 Dados da compra</div><div class="grid form-grid"><div class="field"><label>Fornecedor</label><select onchange="markDirty()"><option>Selecione</option>${(enterpriseData.suppliers||[]).map(s=>`<option>${escapeHTML(s.legalName||s.tradeName||s.id)}</option>`).join('')}</select></div><div class="field"><label>Previsão</label><input type="date" oninput="markDirty()"></div><div class="field"><label>Comprador</label><select onchange="markDirty()"><option>Gustavo</option><option>Ahmad</option><option>Administrador</option></select></div><div class="field"><label>Centro de custo</label><select onchange="markDirty()"><option>Produção</option><option>Estoque</option><option>Comercial</option><option>Administrativo</option></select></div><div class="field"><label>Condição de pagamento</label><input placeholder="Ex.: 28 dias" oninput="markDirty()"></div><div class="field"><label>Produto</label><select onchange="markDirty()"> <option>Selecione</option>${(enterpriseData.products||[]).map(p=>`<option>${escapeHTML(p.name)}${p.code?` · ${escapeHTML(p.code)}`:''}</option>`).join('')}</select></div><div class="field"><label>Categoria</label><select onchange="markDirty()"><option>Matéria-prima</option><option>Acessório</option><option>Insumo</option><option>Produto acabado</option></select></div><div class="field"><label>Status da compra</label><select onchange="markDirty()"><option>Em cotação</option><option>Aguardando aprovação</option><option>Reservado</option><option>Comprado</option></select></div><div class="field"><label>Quantidade</label><input id="fpPurchaseQty" type="number" min="1" value="1" oninput="fpPurchaseRecalcModal();markDirty()"></div><div class="field"><label>Custo unitário</label><input id="fpPurchaseUnitCost" type="number" min="0" step="0.01" value="0" oninput="fpPurchaseRecalcModal();markDirty()"></div><div class="field"><label>Frete</label><input id="fpPurchaseFreight" type="number" min="0" step="0.01" value="0" oninput="fpPurchaseRecalcModal();markDirty()"></div><div class="field"><label>Desconto</label><input id="fpPurchaseDiscount" type="number" min="0" step="0.01" value="0" oninput="fpPurchaseRecalcModal();markDirty()"></div><div class="field"><label>Previsão de entrega</label><input type="date" oninput="markDirty()"></div><div class="field"><label>Local / estoque de destino</label><select onchange="markDirty()"><option>Selecione</option>${(engineeringData.locations||[]).map(l=>`<option>${escapeHTML(l.address_code||l.name)}</option>`).join('')}</select></div><div class="field" style="grid-column:1/-1"><label>Observações para o fornecedor</label><textarea oninput="markDirty()" placeholder="Especificação, cor, tamanho, acabamento, instruções de entrega..."></textarea></div><div class="field" style="grid-column:1/-1"><label>Observações internas</label><textarea oninput="markDirty()" placeholder="Aprovação, urgência, reserva, comprador, centro de custo..."></textarea></div></div></div><div class="form-section"><div class="form-section-title">💲 Resumo da compra</div><div class="grid two"><div class="summary-box"><div class="summary-line"><span>Subtotal</span><strong id="fpPurchaseSubtotal">—</strong></div><div class="summary-line"><span>Total previsto</span><strong id="fpPurchaseTotal">—</strong></div></div><div class="notice" style="height:100%;display:flex;align-items:center;justify-content:center">Compra preparada para orçamento, reserva ou pedido ao fornecedor.</div></div></div>`;
-  if(type==="finance") return `<div class="form-section"><div class="form-section-title">💰 Dados do lançamento</div><div class="grid form-grid"><div class="field"><label>Tipo</label><select onchange="fpFinancePreviewModal();markDirty()"><option>Receita</option><option>Despesa</option><option>Transferência</option></select></div><div class="field"><label>Descrição</label><input oninput="markDirty()"></div><div class="field"><label>Categoria</label><select onchange="markDirty()"><option>Venda</option><option>Fornecedor</option><option>Administrativo</option><option>Frete</option><option>Folha</option></select></div><div class="field"><label>Vencimento</label><input type="date" oninput="markDirty()"></div><div class="field"><label>Valor</label><input id="fpFinanceValue" type="number" min="0" step="0.01" oninput="fpFinancePreviewModal();markDirty()"></div><div class="field"><label>Status</label><select onchange="markDirty()"><option>A receber</option><option>Recebido</option><option>A pagar</option><option>Pago</option></select></div><div class="field"><label>Centro de custo</label><select onchange="markDirty()"><option>Produção</option><option>Comercial</option><option>Administrativo</option><option>Estoque</option></select></div><div class="field"><label>Conta / banco</label><select onchange="markDirty()"><option>Conta principal</option><option>Caixa loja</option><option>Banco digital</option></select></div><div class="field"><label>Forma de pagamento</label><select onchange="markDirty()"><option>PIX</option><option>Boleto</option><option>Cartão</option><option>TED</option><option>Dinheiro</option></select></div><div class="field"><label>Competência</label><input type="month" oninput="markDirty()"></div><div class="field"><label>Cliente / fornecedor</label><input placeholder="Favorecido ou pagador" oninput="markDirty()"></div><div class="field"><label>Documento / referência</label><input placeholder="NF, boleto, contrato, pedido..." oninput="markDirty()"></div><div class="field"><label>Parcelamento</label><select id="fpFinanceInstallments" onchange="fpFinancePreviewModal();markDirty()"><option value="1">À vista</option><option value="2">2x</option><option value="3">3x</option><option value="4">4x</option><option value="6">6x</option></select></div><div class="field"><label>Recorrência</label><select onchange="markDirty()"><option>Não</option><option>Semanal</option><option>Mensal</option><option>Anual</option></select></div><div class="field" style="grid-column:1/-1"><label>Observações</label><textarea oninput="markDirty()" placeholder="Informações de negociação, rateio, comprovantes, observações fiscais..."></textarea></div></div></div><div class="form-section"><div class="form-section-title">📌 Resumo</div><div class="notice">Previsão de parcelamento: <strong id="fpFinanceInstallmentPreview">—</strong></div></div>`;
+  if(type==="finance") return `<div class="form-section"><div class="form-section-title">💰 Dados do lançamento</div><div class="grid form-grid"><div class="field"><label>Tipo</label><select onchange="fpFinancePreviewModal();markDirty()"><option>Receita</option><option>Despesa</option><option>Transferência</option></select></div><div class="field"><label>Descrição</label><input oninput="markDirty()"></div><div class="field"><label>Categoria</label><select onchange="markDirty()"><option>Venda</option><option>Fornecedor</option><option>Administrativo</option><option>Frete</option><option>Folha</option><option>Aluguel</option><option>Energia</option><option>Internet</option><option>Impostos</option><option>Marketing</option><option>Manutenção</option><option>Software / assinatura</option><option>Outros</option></select></div><div class="field"><label>Vencimento</label><input type="date" oninput="markDirty()"></div><div class="field"><label>Valor</label><input id="fpFinanceValue" type="number" min="0" step="0.01" oninput="fpFinancePreviewModal();markDirty()"></div><div class="field"><label>Status</label><select onchange="markDirty()"><option>A receber</option><option>Recebido</option><option>A pagar</option><option>Pago</option></select></div><div class="field"><label>Centro de custo</label><select onchange="markDirty()"><option>Produção</option><option>Comercial</option><option>Administrativo</option><option>Estoque</option></select></div><div class="field"><label>Conta / banco</label><select onchange="markDirty()"><option>Conta principal</option><option>Caixa loja</option><option>Banco digital</option></select></div><div class="field"><label>Forma de pagamento</label><select onchange="markDirty()"><option>PIX</option><option>Boleto</option><option>Cartão</option><option>TED</option><option>Dinheiro</option></select></div><div class="field"><label>Competência</label><input type="month" oninput="markDirty()"></div><div class="field"><label>Cliente / fornecedor</label><input placeholder="Favorecido ou pagador" oninput="markDirty()"></div><div class="field"><label>Documento / referência</label><input placeholder="NF, boleto, contrato, pedido..." oninput="markDirty()"></div><div class="field"><label>Parcelamento</label><select id="fpFinanceInstallments" onchange="fpFinancePreviewModal();markDirty()"><option value="1">À vista</option><option value="2">2x</option><option value="3">3x</option><option value="4">4x</option><option value="6">6x</option></select></div><div class="field"><label>Recorrência</label><select onchange="markDirty()"><option>Não</option><option>Semanal</option><option>Mensal</option><option>Anual</option></select></div><div class="field" style="grid-column:1/-1"><label>Observações</label><textarea oninput="markDirty()" placeholder="Informações de negociação, rateio, comprovantes, observações fiscais..."></textarea></div></div></div><div class="form-section"><div class="form-section-title">📌 Resumo</div><div class="notice">Previsão de parcelamento: <strong id="fpFinanceInstallmentPreview">—</strong></div></div>`;
   if(type==="task") return `<div class="form-section"><div class="form-section-title">✅ Dados da tarefa</div><div class="grid form-grid"><div class="field"><label>Nome / descrição</label><input placeholder="Digite aqui" oninput="markDirty()"></div><div class="field"><label>Status</label><select onchange="markDirty()"><option>Ativo</option><option>Em andamento</option><option>Concluído</option><option>Bloqueado</option></select></div><div class="field"><label>Responsável</label><select onchange="markDirty()"><option>Gustavo</option><option>Ahmad</option><option>Carlos</option></select></div><div class="field"><label>Data</label><input type="date" oninput="markDirty()"></div><div class="field"><label>Prioridade</label><select id="fpTaskPriority" onchange="fpTaskPreviewModal();markDirty()"><option>Média</option><option>Alta</option><option>Baixa</option><option>Urgente</option></select></div><div class="field"><label>Área</label><select onchange="markDirty()"><option>Comercial</option><option>Estoque</option><option>Financeiro</option><option>Produção</option><option>Entrega</option></select></div><div class="field"><label>Prazo</label><input type="datetime-local" oninput="markDirty()"></div><div class="field"><label>Lembrete</label><select onchange="markDirty()"><option>Sem lembrete</option><option>15 min antes</option><option>1 hora antes</option><option>1 dia antes</option></select></div><div class="field"><label>Relacionado a</label><input placeholder="Cliente, pedido, orçamento ou setor" oninput="markDirty()"></div><div class="field"><label>Tipo da tarefa</label><select onchange="markDirty()"><option>Ligação</option><option>Visita</option><option>Follow-up</option><option>Interna</option><option>Cobrança</option></select></div><div class="field" style="grid-column:1/-1"><label>Checklist rápido</label><input placeholder="Ex.: enviar proposta, confirmar frete, retornar cliente" oninput="markDirty()"></div><div class="field" style="grid-column:1/-1"><label>Observações</label><textarea placeholder="Informações importantes..." oninput="markDirty()"></textarea></div></div></div><div class="form-section"><div class="form-section-title">📌 Resumo</div><div class="notice">Prioridade selecionada: <strong id="fpTaskPriorityPreview">Média</strong></div></div>`;
   if(type==="delivery") return `<div class="grid form-grid"><div class="field"><label>Cliente</label><input placeholder="Nome do cliente"></div><div class="field"><label>Motorista</label><select><option>Equipe própria</option><option>Terceirizado</option></select></div><div class="field"><label>Rota</label><input placeholder="Zona / rota"></div><div class="field"><label>Previsão</label><input type="date"></div><div class="field"><label>Veículo</label><input placeholder="Placa / modelo"></div><div class="field"><label>Status</label><select><option>Programada</option><option>Em rota</option><option>Entregue</option></select></div><div class="field" style="grid-column:1/-1"><label>Observações</label><textarea placeholder="Endereço, contato, montagem, restrições..."></textarea></div></div>`;
   return common;
@@ -9097,7 +9185,57 @@ window.deleteRhEmployee=function(id){
 };
 
 function printRhEmployeeRegistration(){
-  const e=rhEnsureEmployee(currentRhEmployee());if(!e)return toast('Selecione um colaborador');const a=e.addressData,h=e.health,b=e.bank;const deps=e.dependents.map(d=>`<tr><td>${rhEsc(d.name)}</td><td>${rhDate(d.birthDate)}</td><td>${rhAgeFromDate(d.birthDate)}</td><td>${rhEsc(d.relationship)}</td><td>${d.hasAlimony?rhEsc(d.alimonyType):'Não'}</td></tr>`).join('')||'<tr><td colspan="5">Nenhum</td></tr>';const win=window.open('','_blank','width=1000,height=800');if(!win)return toast('O navegador bloqueou a janela de impressão');win.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Ficha cadastral - ${rhEsc(e.name)}</title><style>body{font-family:Arial,sans-serif;color:#111;margin:28px;font-size:12px}h1{text-align:center;font-size:22px}h2{font-size:14px;border-bottom:2px solid #111;padding-bottom:5px;margin-top:24px}.top{display:flex;gap:18px;align-items:center}.photo{width:100px;height:100px;border:1px solid #bbb;border-radius:8px;display:grid;place-items:center;overflow:hidden}.photo img{width:100%;height:100%;object-fit:cover}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 18px}.item small{display:block;color:#666}.item strong{display:block;margin-top:2px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ccc;padding:7px;text-align:left}.sign{display:grid;grid-template-columns:1fr 1fr;gap:50px;margin-top:70px}.sign div{border-top:1px solid #222;text-align:center;padding-top:8px}@media print{button{display:none}}</style></head><body><h1>FICHA CADASTRAL DO COLABORADOR</h1><div class="top"><div class="photo">${e.photo?`<img src="${e.photo}">`:'FOTO'}</div><div><h2 style="border:0;margin:0;font-size:20px">${rhEsc(e.name)}</h2><p>${rhEsc(e.employmentCategory)} · ${rhEsc(e.position||'')} · ${rhEsc(e.sector||'')}</p><p>${rhRegistrationInfo(e).label}</p></div></div><h2>Dados pessoais</h2><div class="grid">${[['CPF',e.cpf],['RG',e.rg],['Nascimento',rhDate(e.birthDate)],['Título de eleitor',e.documentsPersonal.voterTitle],['PIS/PASEP',e.documentsPersonal.pis],['CNH',e.documentsPersonal.cnh],['Telefone 1',e.phonePrimary],['Telefone 2',e.phoneSecondary],['E-mail',e.email],...(e.collaboratorModel==='MEI'?[['CNPJ',e.business.cnpj],['Razão social',e.business.legalName]]:[])].map(x=>`<div class="item"><small>${x[0]}</small><strong>${rhEsc(x[1]||'—')}</strong></div>`).join('')}</div><h2>Endereço</h2><p>${rhEsc(e.address||'—')}</p><h2>Vínculo</h2><div class="grid">${[['Início',rhDate(e.startDate)],['Registro',e.registrationDate?rhDate(e.registrationDate):'—'],['Categoria',e.employmentCategory],['Cargo',e.position],['Setor',e.sector],['Jornada',e.workSchedule],['Salário fixo',rhMoneyOrDash(e.salary)],['Benefícios',e.benefits.join(', ')]].map(x=>`<div class="item"><small>${x[0]}</small><strong>${rhEsc(x[1]||'—')}</strong></div>`).join('')}</div><h2>Contatos de emergência</h2>${e.emergency.map(c=>`<p><strong>${rhEsc(c.name)}</strong> — ${rhEsc(c.relationship)} — ${rhEsc(c.phone)}</p>`).join('')||'<p>Nenhum cadastrado.</p>'}<h2>Filhos e dependentes</h2><table><thead><tr><th>Nome</th><th>Nascimento</th><th>Idade</th><th>Parentesco</th><th>Pensão</th></tr></thead><tbody>${deps}</tbody></table><h2>Dados bancários</h2><div class="grid">${[['Banco',b.bank],['Agência',b.agency],['Conta',[b.account,b.accountDigit].filter(Boolean).join('-')],['PIX',b.pixKey],['Instituição PIX',b.pixInstitution],['Portabilidade',b.portability?'Sim':'Não']].map(x=>`<div class="item"><small>${x[0]}</small><strong>${rhEsc(x[1]||'—')}</strong></div>`).join('')}</div><h2>Ficha de saúde</h2><div class="grid">${[['Doença',h.hasDisease==='Sim'?h.conditions:'Não'],['Tratamento',h.underTreatment==='Sim'?h.treatment:'Não'],['Medicamento contínuo',h.continuousMedication==='Sim'?[h.medication,h.dosage].filter(Boolean).join(' · '):'Não'],['Alergias',h.allergies],['Pode fornecer medicamento?',h.canProvideMedication],['Medicamento autorizado',h.authorizedMedication]].map(x=>`<div class="item"><small>${x[0]}</small><strong>${rhEsc(x[1]||'—')}</strong></div>`).join('')}</div><p style="margin-top:32px">Declaro que as informações acima são verdadeiras e autorizo seu uso para as finalidades administrativas relacionadas ao vínculo com a empresa.</p><div class="sign"><div>Assinatura do colaborador</div><div>Responsável da empresa</div></div><p style="margin-top:35px">Data: ____/____/________</p><script>window.onload=()=>setTimeout(()=>window.print(),300)<\/script></body></html>`);win.document.close();
+  const e=rhEnsureEmployee(currentRhEmployee());if(!e)return toast('Selecione um colaborador');const a=e.addressData,h=e.health,b=e.bank;const deps=e.dependents.map(d=>`<tr><td>${rhEsc(d.name)}</td><td>${rhDate(d.birthDate)}</td><td>${rhAgeFromDate(d.birthDate)}</td><td>${rhEsc(d.relationship)}</td><td>${d.hasAlimony?rhEsc(d.alimonyType):'Não'}</td></tr>`).join('')||'<tr><td colspan="5">Nenhum</td></tr>';const win=window.open('','_blank','width=1000,height=800');if(!win)return toast('O navegador bloqueou a janela de impressão');win.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Ficha cadastral - ${rhEsc(e.name)}</title><style>body{font-family:Arial,sans-serif;color:#111;margin:28px;font-size:12px}h1{text-align:center;font-size:22px}h2{font-size:14px;border-bottom:2px solid #111;padding-bottom:5px;margin-top:24px}.top{display:flex;gap:18px;align-items:center}.photo{width:100px;height:100px;border:1px solid #bbb;border-radius:8px;display:grid;place-items:center;overflow:hidden}.photo img{width:100%;height:100%;object-fit:cover}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 18px}.item small{display:block;color:#666}.item strong{display:block;margin-top:2px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ccc;padding:7px;text-align:left}.sign{display:grid;grid-template-columns:1fr 1fr;gap:50px;margin-top:70px}.sign div{border-top:1px solid #222;text-align:center;padding-top:8px}@media print{button{display:none}}</style>
+<style id="financePlannerV1824Styles">
+.finance-planner-v1824{margin:16px 0 18px;display:grid;gap:14px}
+.finance-planner-hero{
+  display:flex;justify-content:space-between;align-items:center;gap:16px;
+  padding:18px;border:1px solid var(--line);border-radius:18px;
+  background:linear-gradient(135deg,color-mix(in srgb,var(--primary) 12%,var(--panel)),var(--panel));
+}
+.finance-planner-hero small{font-size:9px;letter-spacing:.11em;font-weight:900;color:var(--primary)}
+.finance-planner-hero h3{font-size:19px;margin:4px 0}
+.finance-planner-hero p{font-size:11px;color:var(--muted);max-width:720px;line-height:1.5}
+.finance-planner-kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}
+.finance-planner-card{
+  border:1px solid var(--line);background:var(--panel);border-radius:16px;padding:14px;min-height:126px;
+  display:flex;flex-direction:column;gap:5px;box-shadow:0 1px 2px rgba(15,23,42,.03)
+}
+.finance-planner-card>span{font-size:20px}
+.finance-planner-card small{font-size:10px;color:var(--muted);font-weight:800}
+.finance-planner-card strong{font-size:19px;letter-spacing:-.03em;margin-top:2px}
+.finance-planner-card em{font-size:9px;color:var(--muted);font-style:normal;line-height:1.35}
+.finance-planner-row{margin-top:0}
+.finance-category-list,.finance-upcoming-list,.finance-goal-list,.finance-asset-list{display:grid;gap:9px}
+.finance-category-item{display:grid;grid-template-columns:minmax(100px,1fr) 2fr auto;gap:10px;align-items:center}
+.finance-category-item small{font-weight:750;color:var(--text);overflow:hidden;text-overflow:ellipsis}
+.finance-category-bar{height:9px;border-radius:999px;background:var(--line);overflow:hidden}
+.finance-category-bar span{height:100%;display:block;border-radius:999px;background:linear-gradient(90deg,var(--primary),var(--primary-2))}
+.finance-category-item strong{font-size:10px}
+.finance-upcoming-item,.finance-goal-item,.finance-asset-item,.finance-account-item{
+  border:1px solid var(--line);border-radius:13px;padding:11px;background:var(--panel-2)
+}
+.finance-upcoming-item{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.finance-upcoming-item small,.finance-goal-item small,.finance-asset-item small,.finance-account-item small{display:block;color:var(--muted);margin-top:3px}
+.finance-goal-head,.finance-asset-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.finance-goal-progress{height:8px;border-radius:999px;background:var(--line);overflow:hidden;margin-top:9px}
+.finance-goal-progress span{height:100%;display:block;background:linear-gradient(90deg,var(--success),var(--primary));border-radius:999px}
+.finance-goal-actions,.finance-asset-actions{display:flex;gap:5px;align-items:center}
+.finance-account-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.finance-account-item strong{font-size:16px;display:block;margin-top:5px}
+.finance-empty{padding:18px;border:1px dashed var(--line);border-radius:13px;text-align:center;color:var(--muted);font-size:10px}
+@media(max-width:1300px){.finance-planner-kpis{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:850px){.finance-planner-kpis{grid-template-columns:repeat(2,1fr)}.finance-account-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:640px){
+  .finance-planner-hero{align-items:flex-start;flex-direction:column}
+  .finance-planner-hero .btn{width:100%}
+  .finance-planner-kpis{grid-template-columns:1fr}
+  .finance-account-grid{grid-template-columns:1fr}
+  .finance-category-item{grid-template-columns:1fr auto}.finance-category-bar{grid-column:1/-1}
+}
+</style>
+
+</head><body><h1>FICHA CADASTRAL DO COLABORADOR</h1><div class="top"><div class="photo">${e.photo?`<img src="${e.photo}">`:'FOTO'}</div><div><h2 style="border:0;margin:0;font-size:20px">${rhEsc(e.name)}</h2><p>${rhEsc(e.employmentCategory)} · ${rhEsc(e.position||'')} · ${rhEsc(e.sector||'')}</p><p>${rhRegistrationInfo(e).label}</p></div></div><h2>Dados pessoais</h2><div class="grid">${[['CPF',e.cpf],['RG',e.rg],['Nascimento',rhDate(e.birthDate)],['Título de eleitor',e.documentsPersonal.voterTitle],['PIS/PASEP',e.documentsPersonal.pis],['CNH',e.documentsPersonal.cnh],['Telefone 1',e.phonePrimary],['Telefone 2',e.phoneSecondary],['E-mail',e.email],...(e.collaboratorModel==='MEI'?[['CNPJ',e.business.cnpj],['Razão social',e.business.legalName]]:[])].map(x=>`<div class="item"><small>${x[0]}</small><strong>${rhEsc(x[1]||'—')}</strong></div>`).join('')}</div><h2>Endereço</h2><p>${rhEsc(e.address||'—')}</p><h2>Vínculo</h2><div class="grid">${[['Início',rhDate(e.startDate)],['Registro',e.registrationDate?rhDate(e.registrationDate):'—'],['Categoria',e.employmentCategory],['Cargo',e.position],['Setor',e.sector],['Jornada',e.workSchedule],['Salário fixo',rhMoneyOrDash(e.salary)],['Benefícios',e.benefits.join(', ')]].map(x=>`<div class="item"><small>${x[0]}</small><strong>${rhEsc(x[1]||'—')}</strong></div>`).join('')}</div><h2>Contatos de emergência</h2>${e.emergency.map(c=>`<p><strong>${rhEsc(c.name)}</strong> — ${rhEsc(c.relationship)} — ${rhEsc(c.phone)}</p>`).join('')||'<p>Nenhum cadastrado.</p>'}<h2>Filhos e dependentes</h2><table><thead><tr><th>Nome</th><th>Nascimento</th><th>Idade</th><th>Parentesco</th><th>Pensão</th></tr></thead><tbody>${deps}</tbody></table><h2>Dados bancários</h2><div class="grid">${[['Banco',b.bank],['Agência',b.agency],['Conta',[b.account,b.accountDigit].filter(Boolean).join('-')],['PIX',b.pixKey],['Instituição PIX',b.pixInstitution],['Portabilidade',b.portability?'Sim':'Não']].map(x=>`<div class="item"><small>${x[0]}</small><strong>${rhEsc(x[1]||'—')}</strong></div>`).join('')}</div><h2>Ficha de saúde</h2><div class="grid">${[['Doença',h.hasDisease==='Sim'?h.conditions:'Não'],['Tratamento',h.underTreatment==='Sim'?h.treatment:'Não'],['Medicamento contínuo',h.continuousMedication==='Sim'?[h.medication,h.dosage].filter(Boolean).join(' · '):'Não'],['Alergias',h.allergies],['Pode fornecer medicamento?',h.canProvideMedication],['Medicamento autorizado',h.authorizedMedication]].map(x=>`<div class="item"><small>${x[0]}</small><strong>${rhEsc(x[1]||'—')}</strong></div>`).join('')}</div><p style="margin-top:32px">Declaro que as informações acima são verdadeiras e autorizo seu uso para as finalidades administrativas relacionadas ao vínculo com a empresa.</p><div class="sign"><div>Assinatura do colaborador</div><div>Responsável da empresa</div></div><p style="margin-top:35px">Data: ____/____/________</p><script>window.onload=()=>setTimeout(()=>window.print(),300)<\/script></body></html>`);win.document.close();
 }
 
 const rhPreviousSaveModal=window.saveModal;
@@ -9955,5 +10093,410 @@ setTimeout(()=>{syncCoreProductsFromEnterprise();renderStockProductsFromEnterpri
 })();
 </script>
 <script src="stock-locations-hotfix.js?v=18.2.0"></script>
+
+<script id="financePlannerV1824Script">
+(function(){
+  "use strict";
+  if(window.__FP_FINANCE_PLANNER_1824__)return;
+  window.__FP_FINANCE_PLANNER_1824__=true;
+
+  function finMoney(value){
+    if(typeof value==="number"&&Number.isFinite(value))return value;
+    const s=String(value??"").trim();
+    if(!s)return 0;
+    if(/R\$/i.test(s)||s.includes(",")){
+      const normalized=s.replace(/[^\d,.-]/g,"").replace(/\./g,"").replace(",",".");
+      const n=Number(normalized);
+      return Number.isFinite(n)?n:0;
+    }
+    const n=Number(s);
+    return Number.isFinite(n)?n:0;
+  }
+  function finBRL(value){
+    return new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL"}).format(Number(value)||0);
+  }
+  function finEsc(value){
+    return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+  }
+  function finDate(value){
+    const m=String(value||"").match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if(!m)return null;
+    return new Date(Number(m[1]),Number(m[2])-1,Number(m[3]),12,0,0);
+  }
+  function finDateBR(value){
+    const d=finDate(value);
+    return d?d.toLocaleDateString("pt-BR"):"—";
+  }
+  function finEnsure(){
+    if(typeof data==="undefined")return false;
+    if(!Array.isArray(data.financeGoals))data.financeGoals=[];
+    if(!Array.isArray(data.financeAssets))data.financeAssets=[];
+    if(!Array.isArray(data.financeMeta))data.financeMeta=[];
+    if(!Array.isArray(data.financeSettings))data.financeSettings=[];
+    if(!data.financeSettings.length)data.financeSettings.push({
+      dailyMode:"automatic",
+      dailyLimit:0,
+      reserve:0
+    });
+    return true;
+  }
+  function finMeta(id){
+    finEnsure();
+    return data.financeMeta.find(x=>String(x.id)===String(id))||{};
+  }
+  function finUpsertMeta(id,meta){
+    finEnsure();
+    const pos=data.financeMeta.findIndex(x=>String(x.id)===String(id));
+    const row={id,...meta};
+    if(pos>=0)data.financeMeta[pos]=row;
+    else data.financeMeta.push(row);
+  }
+  function finSettings(){
+    finEnsure();
+    return data.financeSettings[0];
+  }
+  function finMonthKey(date=new Date()){
+    return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}`;
+  }
+  function finIsPaid(status){
+    return /pago|recebido|quitado|conclu/i.test(String(status||""));
+  }
+  function finIsOverdue(row,isReceivable){
+    const due=finDate(isReceivable?row[2]:row[3]);
+    if(!due||finIsPaid(isReceivable?row[6]:row[5]))return false;
+    const today=new Date();today.setHours(0,0,0,0);
+    return due<today;
+  }
+  function finRows(){
+    finEnsure();
+    return {
+      receivables:(data.receivables||[]),
+      payables:(data.payables||[])
+    };
+  }
+  function finMonthRows(){
+    const key=finMonthKey(),rows=finRows();
+    return {
+      receivables:rows.receivables.filter(r=>String(r[2]||"").slice(0,7)===key),
+      payables:rows.payables.filter(r=>String(r[3]||"").slice(0,7)===key)
+    };
+  }
+  function finTotals(){
+    const m=finMonthRows();
+    const revenue=m.receivables.reduce((s,r)=>s+finMoney(r[4]),0);
+    const expenses=m.payables.reduce((s,r)=>s+finMoney(r[4]),0);
+    const received=m.receivables.filter(r=>finIsPaid(r[6])).reduce((s,r)=>s+finMoney(r[4]),0);
+    const paid=m.payables.filter(r=>finIsPaid(r[5])).reduce((s,r)=>s+finMoney(r[4]),0);
+    const overdue=m.receivables.filter(r=>finIsOverdue(r,true)).reduce((s,r)=>s+finMoney(r[4]),0);
+    const inad=revenue>0?(overdue/revenue)*100:0;
+    return {revenue,expenses,received,paid,projected:revenue-expenses,overdue,inad,m};
+  }
+  function finWeek(){
+    const today=new Date();today.setHours(0,0,0,0);
+    const end=new Date(today);end.setDate(end.getDate()+7);
+    const rows=finRows();
+    const rec=rows.receivables.filter(r=>{const d=finDate(r[2]);return d&&d>=today&&d<=end}).reduce((s,r)=>s+finMoney(r[4]),0);
+    const pay=rows.payables.filter(r=>{const d=finDate(r[3]);return d&&d>=today&&d<=end}).reduce((s,r)=>s+finMoney(r[4]),0);
+    return {rec,pay,net:rec-pay};
+  }
+  function finRecurringPayables(monthRows){
+    return monthRows.filter(r=>{
+      const meta=finMeta(r[0]);
+      const recurrence=String(meta.recurrence||"Não");
+      const category=String(r[2]||"");
+      return recurrence!=="Não"||/folha|aluguel|energia|internet|contador|software|assinatura/i.test(category);
+    });
+  }
+  function finCardPayables(monthRows){
+    return monthRows.filter(r=>/cart/i.test(String(finMeta(r[0]).method||"")));
+  }
+  function finDailyLimit(projected){
+    const st=finSettings();
+    if(st.dailyMode==="manual"&&Number(st.dailyLimit)>0)return Number(st.dailyLimit);
+    const today=new Date();
+    const last=new Date(today.getFullYear(),today.getMonth()+1,0).getDate();
+    const remaining=Math.max(1,last-today.getDate()+1);
+    return Math.max(0,(Number(projected)-Number(st.reserve||0))/remaining);
+  }
+  function finSetText(id,text){
+    const el=document.getElementById(id);
+    if(el)el.textContent=text;
+  }
+  function finRenderTopKpis(t){
+    const cards=document.querySelectorAll("#financeiro > .grid.kpis .card.kpi");
+    const values=[
+      ["Receita do mês",finBRL(t.revenue),`Recebido: ${finBRL(t.received)}`],
+      ["Despesas",finBRL(t.expenses),`Pago: ${finBRL(t.paid)}`],
+      ["Saldo projetado",finBRL(t.projected),t.projected>=0?"Resultado previsto positivo":"Atenção: saída maior que entrada"],
+      ["Inadimplência",`${t.inad.toFixed(1).replace(".",",")}%`,t.overdue?`Vencido: ${finBRL(t.overdue)}`:"Sem valores vencidos"]
+    ];
+    cards.forEach((card,i)=>{
+      const small=card.querySelector("small"),strong=card.querySelector("strong"),trend=card.querySelector(".trend");
+      if(!values[i])return;
+      if(small)small.textContent=values[i][0];
+      if(strong)strong.textContent=values[i][1];
+      if(trend)trend.textContent=values[i][2];
+      if(trend)trend.classList.toggle("bad",(i===2&&t.projected<0)||(i===3&&t.inad>0));
+    });
+  }
+  function finRenderCategories(payables){
+    const box=document.getElementById("fpFinCategories");if(!box)return;
+    const groups={};
+    payables.forEach(r=>{const cat=String(r[2]||"Sem categoria");groups[cat]=(groups[cat]||0)+finMoney(r[4])});
+    const rows=Object.entries(groups).sort((a,b)=>b[1]-a[1]);
+    const max=Math.max(1,...rows.map(x=>x[1]));
+    box.innerHTML=rows.length?rows.map(([name,value])=>`
+      <div class="finance-category-item">
+        <small>${finEsc(name)}</small>
+        <div class="finance-category-bar"><span style="width:${Math.max(4,(value/max)*100)}%"></span></div>
+        <strong>${finBRL(value)}</strong>
+      </div>`).join(""):`<div class="finance-empty">Nenhuma despesa cadastrada neste mês.</div>`;
+  }
+  function finUpcomingRows(){
+    const today=new Date();today.setHours(0,0,0,0);
+    const end=new Date(today);end.setDate(end.getDate()+30);
+    const rows=[];
+    (data.receivables||[]).forEach(r=>{const d=finDate(r[2]);if(d&&d>=today&&d<=end&&!finIsPaid(r[6]))rows.push({kind:"Entrada",id:r[0],name:r[1],due:r[2],value:finMoney(r[4])})});
+    (data.payables||[]).forEach(r=>{const d=finDate(r[3]);if(d&&d>=today&&d<=end&&!finIsPaid(r[5]))rows.push({kind:"Saída",id:r[0],name:r[1],due:r[3],value:finMoney(r[4])})});
+    return rows.sort((a,b)=>finDate(a.due)-finDate(b.due)).slice(0,8);
+  }
+  function finRenderUpcoming(){
+    const box=document.getElementById("fpFinUpcoming");if(!box)return;
+    const rows=finUpcomingRows();
+    box.innerHTML=rows.length?rows.map(r=>`
+      <div class="finance-upcoming-item">
+        <div><strong>${r.kind==="Entrada"?"🟢":"🔴"} ${finEsc(r.name||r.id)}</strong><small>${finEsc(r.kind)} · ${finDateBR(r.due)}</small></div>
+        <strong>${finBRL(r.value)}</strong>
+      </div>`).join(""):`<div class="finance-empty">Nenhum vencimento nos próximos 30 dias.</div>`;
+  }
+  function finRenderGoals(){
+    const box=document.getElementById("fpFinGoals");if(!box)return;
+    const rows=data.financeGoals||[];
+    box.innerHTML=rows.length?rows.map(g=>{
+      const pct=Math.max(0,Math.min(100,(Number(g.current||0)/Math.max(1,Number(g.target||0)))*100));
+      return `<div class="finance-goal-item">
+        <div class="finance-goal-head"><div><strong>${finEsc(g.name)}</strong><small>${finBRL(g.current)} de ${finBRL(g.target)}${g.deadline?` · até ${finDateBR(g.deadline)}`:""}</small></div>
+        <div class="finance-goal-actions"><button class="btn sm secondary" onclick="fpOpenFinanceGoal('${finEsc(g.id)}')">Editar</button><button class="btn sm danger" onclick="fpDeleteFinanceGoal('${finEsc(g.id)}')">×</button></div></div>
+        <div class="finance-goal-progress"><span style="width:${pct}%"></span></div>
+      </div>`;
+    }).join(""):`<div class="finance-empty">Nenhuma meta financeira cadastrada.</div>`;
+  }
+  function finRenderAssets(){
+    const box=document.getElementById("fpFinAssets");if(!box)return;
+    const rows=data.financeAssets||[];
+    const total=rows.reduce((s,x)=>s+Number(x.value||0),0);
+    finSetText("fpFinAssetsTotal",finBRL(total));
+    finSetText("fpFinAssetsHelp",`${rows.length} item(ns) cadastrado(s)`);
+    box.innerHTML=rows.length?rows.map(a=>`
+      <div class="finance-asset-item"><div class="finance-asset-head"><div><strong>${finEsc(a.name)}</strong><small>${finEsc(a.type||"Patrimônio")}</small></div>
+      <div class="finance-asset-actions"><strong>${finBRL(a.value)}</strong><button class="btn sm secondary" onclick="fpOpenFinanceAsset('${finEsc(a.id)}')">Editar</button><button class="btn sm danger" onclick="fpDeleteFinanceAsset('${finEsc(a.id)}')">×</button></div></div></div>
+    `).join(""):`<div class="finance-empty">Nenhuma reserva, investimento ou patrimônio cadastrado.</div>`;
+  }
+  function finRenderAccounts(){
+    const box=document.getElementById("fpFinAccounts");if(!box)return;
+    const totals={};
+    (data.receivables||[]).forEach(r=>{const account=String(finMeta(r[0]).account||"Conta principal");totals[account]=(totals[account]||0)+finMoney(r[4])});
+    (data.payables||[]).forEach(r=>{const account=String(finMeta(r[0]).account||"Conta principal");totals[account]=(totals[account]||0)-finMoney(r[4])});
+    const rows=Object.entries(totals).sort((a,b)=>b[1]-a[1]);
+    box.innerHTML=rows.length?rows.map(([name,value])=>`
+      <div class="finance-account-item"><small>${finEsc(name)}</small><strong>${finBRL(value)}</strong><small>Saldo projetado pelas movimentações cadastradas</small></div>
+    `).join(""):`<div class="finance-empty">As contas aparecerão aqui conforme os lançamentos financeiros forem cadastrados.</div>`;
+  }
+  function finRenderCashBars(){
+    const box=document.getElementById("cashBars");if(!box)return;
+    const today=new Date();today.setHours(0,0,0,0);
+    const weeks=[];
+    for(let i=0;i<8;i++){
+      const start=new Date(today);start.setDate(start.getDate()+i*7);
+      const end=new Date(start);end.setDate(end.getDate()+6);
+      let value=0;
+      (data.receivables||[]).forEach(r=>{const d=finDate(r[2]);if(d&&d>=start&&d<=end)value+=finMoney(r[4])});
+      (data.payables||[]).forEach(r=>{const d=finDate(r[3]);if(d&&d>=start&&d<=end)value-=finMoney(r[4])});
+      weeks.push({label:`S${i+1}`,value});
+    }
+    const max=Math.max(1,...weeks.map(x=>Math.abs(x.value)));
+    box.innerHTML=weeks.map(w=>`<div class="bar-wrap" title="${finBRL(w.value)}"><div class="bar" style="height:${Math.max(8,(Math.abs(w.value)/max)*180)}px;opacity:${w.value<0?.45:1}"></div><span>${w.label}</span></div>`).join("");
+  }
+  function finRenderDre(t){
+    const fixed=finRecurringPayables(t.m.payables).reduce((s,r)=>s+finMoney(r[4]),0);
+    const variable=Math.max(0,t.expenses-fixed);
+    const values={
+      dreGrossRevenue:t.revenue,
+      dreTaxes:0,
+      dreVariableCosts:variable,
+      dreContributionMargin:t.revenue-variable,
+      dreFixedExpenses:fixed,
+      dreOperatingResult:t.projected
+    };
+    Object.entries(values).forEach(([id,value])=>{const el=document.getElementById(id);if(el)el.textContent=finBRL(value)});
+  }
+  function finCleanMeta(){
+    const ids=new Set([...(data.receivables||[]).map(r=>String(r[0])),...(data.payables||[]).map(r=>String(r[0]))]);
+    data.financeMeta=(data.financeMeta||[]).filter(x=>ids.has(String(x.id)));
+  }
+  function renderFinancePlanner(){
+    if(!finEnsure())return;
+    if(!document.getElementById("financePlannerV1824"))return;
+    finCleanMeta();
+    const t=finTotals(),w=finWeek();
+    const fixed=finRecurringPayables(t.m.payables);
+    const card=finCardPayables(t.m.payables);
+    finRenderTopKpis(t);
+    finSetText("fpFinProjectedBalance",finBRL(t.projected));
+    finSetText("fpFinProjectedBalanceHelp",`Entradas ${finBRL(t.revenue)} · Saídas ${finBRL(t.expenses)}`);
+    finSetText("fpFinWeekNet",finBRL(w.net));
+    finSetText("fpFinWeekHelp",`A receber ${finBRL(w.rec)} · A pagar ${finBRL(w.pay)}`);
+    finSetText("fpFinDailyLimit",finBRL(finDailyLimit(t.projected)));
+    const settings=finSettings();
+    finSetText("fpFinDailyLimitHelp",settings.dailyMode==="manual"?"Limite diário definido manualmente":`Automático · reserva mínima ${finBRL(settings.reserve||0)}`);
+    finSetText("fpFinFixedBills",finBRL(fixed.reduce((s,r)=>s+finMoney(r[4]),0)));
+    finSetText("fpFinFixedBillsHelp",`${fixed.length} conta(s) recorrente(s)`);
+    finSetText("fpFinCardBill",finBRL(card.reduce((s,r)=>s+finMoney(r[4]),0)));
+    finRenderCategories(t.m.payables);
+    finRenderUpcoming();
+    finRenderGoals();
+    finRenderAssets();
+    finRenderAccounts();
+    finRenderCashBars();
+    finRenderDre(t);
+  }
+  window.renderFinancePlanner=renderFinancePlanner;
+
+  let plannerContext=null;
+  function showPlannerModal(title,subtitle,html,context){
+    plannerContext=context;
+    const titleEl=document.getElementById("modalTitle"),subEl=document.getElementById("modalSubtitle"),body=document.getElementById("modalBody");
+    if(titleEl)titleEl.textContent=title;
+    if(subEl)subEl.textContent=subtitle||"";
+    if(body)body.innerHTML=html;
+    document.getElementById("modalOverlay")?.classList.add("show");
+  }
+  window.fpOpenFinancePlannerSettings=function(){
+    const s=finSettings();
+    showPlannerModal("Planejamento financeiro","Defina como o limite diário da empresa deve ser calculado.",`
+      <form id="fpFinancePlannerSettingsForm"><div class="grid form-grid">
+        <div class="field"><label>Modo do limite diário</label><select name="dailyMode"><option value="automatic" ${s.dailyMode!=="manual"?"selected":""}>Automático pelo caixa</option><option value="manual" ${s.dailyMode==="manual"?"selected":""}>Manual</option></select></div>
+        <div class="field"><label>Limite diário manual</label><input name="dailyLimit" type="number" min="0" step="0.01" value="${Number(s.dailyLimit||0)}"></div>
+        <div class="field"><label>Reserva mínima de caixa</label><input name="reserve" type="number" min="0" step="0.01" value="${Number(s.reserve||0)}"></div>
+        <div class="notice" style="grid-column:1/-1">No modo automático, o sistema desconta a reserva mínima do saldo projetado e divide o restante pelos dias que faltam no mês.</div>
+      </div></form>`,"settings");
+  };
+  window.fpOpenFinanceGoal=function(id=null){
+    const g=(data.financeGoals||[]).find(x=>String(x.id)===String(id))||{};
+    showPlannerModal(id?"Editar meta financeira":"Nova meta financeira","Acompanhe objetivos de caixa e crescimento.",`
+      <form id="fpFinanceGoalForm"><div class="grid form-grid">
+        <input type="hidden" name="id" value="${finEsc(id||"")}">
+        <div class="field"><label>Nome da meta</label><input name="name" required value="${finEsc(g.name||"")}" placeholder="Ex.: Reserva para compra de máquina"></div>
+        <div class="field"><label>Valor da meta</label><input name="target" type="number" min="0" step="0.01" required value="${Number(g.target||0)}"></div>
+        <div class="field"><label>Valor já alcançado</label><input name="current" type="number" min="0" step="0.01" value="${Number(g.current||0)}"></div>
+        <div class="field"><label>Prazo</label><input name="deadline" type="date" value="${finEsc(g.deadline||"")}"></div>
+      </div></form>`,"goal");
+  };
+  window.fpOpenFinanceAsset=function(id=null){
+    const a=(data.financeAssets||[]).find(x=>String(x.id)===String(id))||{};
+    showPlannerModal(id?"Editar patrimônio / investimento":"Novo patrimônio / investimento","Registre reservas, aplicações e bens da empresa.",`
+      <form id="fpFinanceAssetForm"><div class="grid form-grid">
+        <input type="hidden" name="id" value="${finEsc(id||"")}">
+        <div class="field"><label>Nome</label><input name="name" required value="${finEsc(a.name||"")}" placeholder="Ex.: Reserva de emergência PJ"></div>
+        <div class="field"><label>Tipo</label><select name="type">${["Reserva","Investimento","Imobilizado","Caixa aplicado","Outro"].map(x=>`<option ${x===a.type?"selected":""}>${x}</option>`).join("")}</select></div>
+        <div class="field"><label>Valor atual</label><input name="value" type="number" min="0" step="0.01" required value="${Number(a.value||0)}"></div>
+      </div></form>`,"asset");
+  };
+  window.fpDeleteFinanceGoal=function(id){
+    if(!confirm("Excluir esta meta financeira?"))return;
+    data.financeGoals=(data.financeGoals||[]).filter(x=>String(x.id)!==String(id));
+    fpPersistState?.();renderFinancePlanner();
+  };
+  window.fpDeleteFinanceAsset=function(id){
+    if(!confirm("Excluir este item de patrimônio?"))return;
+    data.financeAssets=(data.financeAssets||[]).filter(x=>String(x.id)!==String(id));
+    fpPersistState?.();renderFinancePlanner();
+  };
+
+  if(typeof saveModal==="function"){
+    const previousSaveModal=saveModal;
+    saveModal=function(){
+      if(!plannerContext)return previousSaveModal.apply(this,arguments);
+      finEnsure();
+      if(plannerContext==="settings"){
+        const form=document.getElementById("fpFinancePlannerSettingsForm");if(!form)return false;
+        const fd=new FormData(form),s=finSettings();
+        s.dailyMode=String(fd.get("dailyMode")||"automatic");
+        s.dailyLimit=Number(fd.get("dailyLimit")||0);
+        s.reserve=Number(fd.get("reserve")||0);
+      }else if(plannerContext==="goal"){
+        const form=document.getElementById("fpFinanceGoalForm");if(!form||!form.reportValidity())return false;
+        const fd=new FormData(form),id=String(fd.get("id")||"")||`META-${Date.now()}`;
+        let row=data.financeGoals.find(x=>String(x.id)===id);
+        if(!row){row={id};data.financeGoals.push(row)}
+        Object.assign(row,{name:String(fd.get("name")||""),target:Number(fd.get("target")||0),current:Number(fd.get("current")||0),deadline:String(fd.get("deadline")||"")});
+      }else if(plannerContext==="asset"){
+        const form=document.getElementById("fpFinanceAssetForm");if(!form||!form.reportValidity())return false;
+        const fd=new FormData(form),id=String(fd.get("id")||"")||`PAT-${Date.now()}`;
+        let row=data.financeAssets.find(x=>String(x.id)===id);
+        if(!row){row={id};data.financeAssets.push(row)}
+        Object.assign(row,{name:String(fd.get("name")||""),type:String(fd.get("type")||"Outro"),value:Number(fd.get("value")||0)});
+      }
+      plannerContext=null;
+      fpPersistState?.();
+      closeModal?.();
+      renderFinancePlanner();
+      toast?.("Planejamento financeiro atualizado");
+      return true;
+    };
+  }
+
+  if(typeof fpCreateCoreRecord==="function"){
+    const previousCreateCoreRecord=fpCreateCoreRecord;
+    fpCreateCoreRecord=function(type,values,title){
+      if(type!=="finance")return previousCreateCoreRecord.apply(this,arguments);
+      finEnsure();
+      const kind=fpValue(values,"Tipo")||"Receita";
+      const description=fpValue(values,"Descrição")||"Novo lançamento";
+      const amount=fpValue(values,"Valor")||"R$ 0,00";
+      const category=fpValue(values,"Categoria")||"Administrativo";
+      const today=new Date().toISOString().slice(0,10);
+      const due=fpValue(values,"Vencimento","Data")||today;
+      const launchStatus=fpValue(values,"Status")||(kind==="Receita"?"A receber":"A pagar");
+      const method=fpValue(values,"Forma de pagamento")||"—";
+      const entity=fpValue(values,"Cliente / fornecedor")||description;
+      const account=fpValue(values,"Conta / banco")||"Conta principal";
+      const costCenter=fpValue(values,"Centro de custo")||"";
+      const recurrence=fpValue(values,"Recorrência")||"Não";
+      const competence=fpValue(values,"Competência")||"";
+      const reference=fpValue(values,"Documento / referência")||"";
+      let id="";
+      if(kind==="Receita"){
+        id=fpNewId("REC");
+        data.receivables.unshift([id,entity,due,method,amount,"R$ 0,00",launchStatus]);
+      }else if(kind==="Despesa"){
+        id=fpNewId("PAG");
+        data.payables.unshift([id,entity,category,due,amount,launchStatus]);
+      }else{
+        id=fpNewId("TRF");
+        if(typeof universalCreatedRecords!=="undefined")universalCreatedRecords.unshift({id,title:description,type:"Transferência",page:"financeiro",date:new Date().toISOString(),values});
+      }
+      finUpsertMeta(id,{kind,description,category,due,method,entity,account,costCenter,recurrence,competence,reference});
+      fpPersistState?.();
+      render?.();
+      setTimeout(renderFinancePlanner,0);
+      return true;
+    };
+  }
+
+  if(typeof render==="function"){
+    const previousRender=render;
+    render=function(){
+      const result=previousRender.apply(this,arguments);
+      setTimeout(renderFinancePlanner,0);
+      return result;
+    };
+  }
+
+  document.addEventListener("DOMContentLoaded",()=>setTimeout(renderFinancePlanner,200));
+  setTimeout(renderFinancePlanner,400);
+})();
+</script>
+
 </body>
 </html>
