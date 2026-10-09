@@ -2491,15 +2491,17 @@ function renderEnterprisePagination(type,containerId){
 
   container.innerHTML=`<span>Mostrando ${all.length?start+1:0}–${start+rows.length} de ${all.length} registros</span>
     <div class="pagination-buttons">
-      <button type="button" data-fp-enterprise-page="${Math.max(1,page-1)}" ${page<=1?"disabled":""} aria-label="Página anterior">‹</button>
-      ${pages.map(p=>`<button type="button" data-fp-enterprise-page="${p}" class="${p===page?"active":""}" ${p===page?'aria-current="page"':""}>${p}</button>`).join("")}
-      <button type="button" data-fp-enterprise-page="${Math.min(totalPages,page+1)}" ${page>=totalPages?"disabled":""} aria-label="Próxima página">›</button>
+      <button type="button" data-fp-enterprise-type="${type}" data-fp-enterprise-page="${Math.max(1,page-1)}" ${page<=1?"disabled":""} aria-label="Página anterior">‹</button>
+      ${pages.map(p=>`<button type="button" data-fp-enterprise-type="${type}" data-fp-enterprise-page="${p}" class="${p===page?"active":""}" ${p===page?'aria-current="page"':""}>${p}</button>`).join("")}
+      <button type="button" data-fp-enterprise-type="${type}" data-fp-enterprise-page="${Math.min(totalPages,page+1)}" ${page>=totalPages?"disabled":""} aria-label="Próxima página">›</button>
     </div>`;
 
   container.querySelectorAll("[data-fp-enterprise-page]").forEach(button=>{
-    button.addEventListener("click",()=>{
+    button.addEventListener("click",(event)=>{
       if(button.disabled)return;
-      changeEnterprisePage(type,Number(button.dataset.fpEnterprisePage||1));
+      event.preventDefault();
+      event.stopPropagation();
+      changeEnterprisePage(button.dataset.fpEnterpriseType||type,Number(button.dataset.fpEnterprisePage||1));
     });
   });
 }
@@ -4504,6 +4506,24 @@ function initFrontendButtonFallbacks(){
   document.addEventListener("click",event=>{
     const button=event.target.closest("button");
     if(!button||button.disabled)return;
+
+    // Paginação funcional nunca entra no fallback de modo demonstração.
+    if(button.matches("[data-fp-enterprise-page]")){
+      event.preventDefault();
+      event.stopPropagation();
+      window.changeEnterprisePage?.(
+        button.dataset.fpEnterpriseType,
+        Number(button.dataset.fpEnterprisePage||1)
+      );
+      return;
+    }
+    if(button.matches("[data-fp-rh-page]")){
+      event.preventDefault();
+      event.stopPropagation();
+      window.changeRhEmployeePage?.(Number(button.dataset.fpRhPage||1));
+      return;
+    }
+    if(button.closest(".enterprise-pagination,.pagination-buttons"))return;
 
     if(button.classList.contains("page-number")){
       button.parentElement?.querySelectorAll(".page-number").forEach(x=>x.classList.remove("active"));
@@ -9068,8 +9088,10 @@ window.__fpLastRhFilteredRows=rows;
         <button type="button" data-fp-rh-page="${Math.min(totalPages,rhEmployeePage+1)}" ${rhEmployeePage>=totalPages?"disabled":""} aria-label="Próxima página">›</button>
       </div>`;
     pagination.querySelectorAll("[data-fp-rh-page]").forEach(button=>{
-      button.addEventListener("click",()=>{
+      button.addEventListener("click",(event)=>{
         if(button.disabled)return;
+        event.preventDefault();
+        event.stopPropagation();
         changeRhEmployeePage(Number(button.dataset.fpRhPage||1));
       });
     });
@@ -9280,6 +9302,17 @@ function printRhEmployeeRegistration(){
   .finance-category-item{grid-template-columns:1fr auto}.finance-category-bar{grid-column:1/-1}
 }
 </style>
+
+<style id="paginationV1827Styles">
+.enterprise-pagination{align-items:center}
+.pagination-buttons button{
+  transition:border-color .15s ease,background .15s ease,color .15s ease,transform .1s ease;
+}
+.pagination-buttons button:not(:disabled):active{transform:scale(.94)}
+.pagination-buttons button:disabled{opacity:.35;cursor:not-allowed}
+.pagination-buttons button.active{box-shadow:0 0 0 2px color-mix(in srgb,var(--primary) 18%,transparent)}
+</style>
+
 </head><body><h1>FICHA CADASTRAL DO COLABORADOR</h1><div class="top"><div class="photo">${e.photo?`<img src="${e.photo}">`:'FOTO'}</div><div><h2 style="border:0;margin:0;font-size:20px">${rhEsc(e.name)}</h2><p>${rhEsc(e.employmentCategory)} · ${rhEsc(e.position||'')} · ${rhEsc(e.sector||'')}</p><p>${rhRegistrationInfo(e).label}</p></div></div><h2>Dados pessoais</h2><div class="grid">${[['CPF',e.cpf],['RG',e.rg],['Nascimento',rhDate(e.birthDate)],['Título de eleitor',e.documentsPersonal.voterTitle],['PIS/PASEP',e.documentsPersonal.pis],['CNH',e.documentsPersonal.cnh],['Telefone 1',e.phonePrimary],['Telefone 2',e.phoneSecondary],['E-mail',e.email],...(e.collaboratorModel==='MEI'?[['CNPJ',e.business.cnpj],['Razão social',e.business.legalName]]:[])].map(x=>`<div class="item"><small>${x[0]}</small><strong>${rhEsc(x[1]||'—')}</strong></div>`).join('')}</div><h2>Endereço</h2><p>${rhEsc(e.address||'—')}</p><h2>Vínculo</h2><div class="grid">${[['Início',rhDate(e.startDate)],['Registro',e.registrationDate?rhDate(e.registrationDate):'—'],['Categoria',e.employmentCategory],['Cargo',e.position],['Setor',e.sector],['Jornada',e.workSchedule],['Salário fixo',rhMoneyOrDash(e.salary)],['Benefícios',e.benefits.join(', ')]].map(x=>`<div class="item"><small>${x[0]}</small><strong>${rhEsc(x[1]||'—')}</strong></div>`).join('')}</div><h2>Contatos de emergência</h2>${e.emergency.map(c=>`<p><strong>${rhEsc(c.name)}</strong> — ${rhEsc(c.relationship)} — ${rhEsc(c.phone)}</p>`).join('')||'<p>Nenhum cadastrado.</p>'}<h2>Filhos e dependentes</h2><table><thead><tr><th>Nome</th><th>Nascimento</th><th>Idade</th><th>Parentesco</th><th>Pensão</th></tr></thead><tbody>${deps}</tbody></table><h2>Dados bancários</h2><div class="grid">${[['Banco',b.bank],['Agência',b.agency],['Conta',[b.account,b.accountDigit].filter(Boolean).join('-')],['PIX',b.pixKey],['Instituição PIX',b.pixInstitution],['Portabilidade',b.portability?'Sim':'Não']].map(x=>`<div class="item"><small>${x[0]}</small><strong>${rhEsc(x[1]||'—')}</strong></div>`).join('')}</div><h2>Ficha de saúde</h2><div class="grid">${[['Doença',h.hasDisease==='Sim'?h.conditions:'Não'],['Tratamento',h.underTreatment==='Sim'?h.treatment:'Não'],['Medicamento contínuo',h.continuousMedication==='Sim'?[h.medication,h.dosage].filter(Boolean).join(' · '):'Não'],['Alergias',h.allergies],['Pode fornecer medicamento?',h.canProvideMedication],['Medicamento autorizado',h.authorizedMedication]].map(x=>`<div class="item"><small>${x[0]}</small><strong>${rhEsc(x[1]||'—')}</strong></div>`).join('')}</div><p style="margin-top:32px">Declaro que as informações acima são verdadeiras e autorizo seu uso para as finalidades administrativas relacionadas ao vínculo com a empresa.</p><div class="sign"><div>Assinatura do colaborador</div><div>Responsável da empresa</div></div><p style="margin-top:35px">Data: ____/____/________</p><script>window.onload=()=>setTimeout(()=>window.print(),300)<\/script></body></html>`);win.document.close();
 }
 
