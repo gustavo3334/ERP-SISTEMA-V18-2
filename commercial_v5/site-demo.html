@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fácil Pedido — Catálogo público (teste)</title>
+<style>
+:root{font-family:Inter,Arial,sans-serif;color:#14213d;background:#f5f6f8}*{box-sizing:border-box}body{margin:0}.top{background:#ffe600;padding:22px}.wrap{max-width:1180px;margin:auto}.bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.bar input{flex:1;min-width:260px;padding:12px;border:1px solid #ddd;border-radius:8px}.bar button{padding:12px 18px;border:0;border-radius:8px;background:#14213d;color:#fff;font-weight:700}.hint{font-size:12px;margin-top:8px;color:#5b4b00}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;padding:24px 0}.card{background:white;border-radius:14px;overflow:hidden;border:1px solid #e5e7eb;box-shadow:0 8px 22px rgba(0,0,0,.05)}.pic{height:210px;background:#eee}.pic img{width:100%;height:100%;object-fit:cover}.body{padding:14px}.body h3{margin:0 0 6px}.price{font-size:22px;font-weight:800;margin-top:12px}.empty{background:#fff;padding:30px;border-radius:14px;margin-top:24px}.status{font-size:12px;margin-top:10px}.ok{color:#087f5b}.bad{color:#c92a2a}
+</style>
+</head>
+<body>
+<div class="top"><div class="wrap"><h1>Catálogo público — teste de integração</h1><div class="bar"><input id="api" placeholder="URL da API"><button id="load">Carregar catálogo</button></div><div class="hint">Produtos só aparecem aqui depois de serem publicados pela área RH / Catálogo.</div><div id="status" class="status"></div></div></div>
+<main class="wrap"><div id="grid" class="grid"></div></main>
+<script>
+document.querySelector('#api').value=location.protocol==='file:'?'http://127.0.0.1:8010/api/v1':location.origin+'/api/v1';
+const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const brl=v=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(v)||0);
+async function load(){const base=document.querySelector('#api').value.replace(/\/+$/,'');const st=document.querySelector('#status'),grid=document.querySelector('#grid');st.className='status';st.textContent='Carregando...';grid.innerHTML='';try{const r=await fetch(base+'/public/catalog');if(!r.ok)throw new Error('HTTP '+r.status);const d=await r.json();const ps=d.products||[];st.className='status ok';st.textContent=`Conectado • ${ps.length} produto(s) publicado(s)`;grid.innerHTML=ps.length?ps.map(p=>`<article class="card"><div class="pic">${p.cover?`<img src="${esc(p.cover)}" alt="">`:''}</div><div class="body"><small>${esc(p.code||'')}</small><h3>${esc(p.name||'')}</h3><div>${esc(p.subtitle||p.description||'')}</div><div class="price">${brl(p.price)}</div></div></article>`).join(''):`<div class="empty">Nenhum produto publicado ainda. Entre no Fácil Pedido com o perfil RH / Catálogo, adicione a foto e marque o produto como publicado.</div>`}catch(e){st.className='status bad';st.textContent='Falha: '+e.message;grid.innerHTML='<div class="empty">Confirme se o Gateway está aberto em http://127.0.0.1:8010 e tente novamente.</div>'}}
+document.querySelector('#load').onclick=load;
+load();
+</script>
+</body></html>

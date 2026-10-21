@@ -1,0 +1,11 @@
+# nunca fazer commit de dados pessoais ou credenciais
+.env
+.env.*
+!.env.example
+!.env.real.example
+.venv/
+__pycache__/
+*.py[cod]
+*.db
+*.sqlite3
+.pytest_cache/
