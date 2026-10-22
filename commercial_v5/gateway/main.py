@@ -700,6 +700,50 @@ def _get_catalog_state(s: Session) -> dict[str, Any]:
     return {"payload": dict(row.payload or {}) if row else {}, "revision": int(row.revision or 0) if row else 0}
 
 
+def _media_url(request: Request, media_id: str) -> str:
+    """Mounted deployments resolve to /comercial/api/v1/media/{id}."""
+    return str(request.url_for("media_get", media_id=media_id))
+
+
+def _catalog_with_persisted_media(s: Session, request: Request) -> dict[str, Any]:
+    """Reconcile old uploads left orphaned by prior front-end saves.
+
+    The authoritative photo bytes live in commercial_product_media in Postgres.
+    Recover the missing references without overwriting other catalog fields.
+    """
+    state = _get_catalog_state(s)
+    payload = state["payload"]
+    all_media = payload.get("media") if isinstance(payload.get("media"), dict) else {}
+    # Read only identifiers; never download every binary photo for catalog GETs.
+    rows = s.execute(select(ProductMedia.id, ProductMedia.product_id).order_by(ProductMedia.created_at, ProductMedia.id)).all()
+    if not rows:
+        return state
+    revised = {**all_media}
+    dirty = False
+    for image in rows:
+        current = revised.get(image.product_id)
+        entry = dict(current) if isinstance(current, dict) else {}
+        photos = list(entry.get("photos") or [])
+        # Older deployments stored absolute URLs on the old Render service.
+        # Normalize those same photo ids to the active unified service host.
+        canonical = _media_url(request, image.id)
+        matching = [i for i, src in enumerate(photos) if str(src).split("/media/")[-1].split("?")[0] == image.id]
+        if matching:
+            if photos[matching[0]] != canonical:
+                photos[matching[0]] = canonical
+                dirty = True
+        elif len(photos) < MAX_PRODUCT_IMAGES:
+            photos.append(canonical)
+            dirty = True
+        entry["photos"] = photos
+        revised[image.product_id] = entry
+    if dirty:
+        # Return recovered images even if no write was possible. Uploads going
+        # forward attach atomically and persist their references in Postgres.
+        state["payload"] = {**payload, "media": revised}
+    return state
+
+
 @app.get("/api/v1/catalog-management/access")
 def catalog_access(request: Request):
     user = _current_user(request)
@@ -760,7 +804,7 @@ def _catalog_state_for_user(state: dict[str, Any], user: dict[str, Any]) -> dict
 @app.get("/api/v1/catalog-management/state")
 def catalog_state_get(request: Request, s: Session = Depends(db_session)):
     user = _require_catalog(request, "read")
-    return _catalog_state_for_user(_get_catalog_state(s), user)
+    return _catalog_state_for_user(_catalog_with_persisted_media(s, request), user)
 
 
 @app.put("/api/v1/catalog-management/state")
@@ -887,11 +931,17 @@ def _decode_data_url(value: str) -> tuple[str, bytes]:
                 raise HTTPException(415, "Formato de imagem inválido")
             image.thumbnail((2200, 2200))
             out = io.BytesIO()
-            image.convert("RGB").save(out, format="JPEG", quality=83, optimize=True)
+            has_alpha = image.mode in {"RGBA", "LA"} or (image.mode == "P" and "transparency" in image.info)
+            if has_alpha:
+                image.convert("RGBA").save(out, format="PNG", optimize=True)
+                ctype = "image/png"
+            else:
+                image.convert("RGB").save(out, format="JPEG", quality=83, optimize=True)
+                ctype = "image/jpeg"
             normalized = out.getvalue()
             if len(normalized) > MAX_IMAGE_BYTES:
                 raise HTTPException(413, "Imagem convertida muito grande")
-            return "image/jpeg", normalized
+            return ctype, normalized
     except HTTPException:
         raise
     except (UnidentifiedImageError, OSError, ValueError, SyntaxError) as exc:
@@ -904,23 +954,47 @@ def media_upload(body: MediaInput, request: Request, s: Session = Depends(db_ses
     ctype, raw = _decode_data_url(body.data_url)
     if not body.product_id or len(body.product_id) > 64:
         raise HTTPException(422, "Identificador de produto inválido")
-    # Não aceita uploads vinculados a produtos inexistentes no ERP.
     product_status, _, _ = _erp_call("GET", f"/products/{body.product_id}", token=_service_token())
     if product_status >= 400:
         raise HTTPException(404, "Produto não encontrado no ERP")
-    existing_count = s.scalar(select(func.count(ProductMedia.id)).where(ProductMedia.product_id == body.product_id)) or 0
-    if existing_count >= MAX_PRODUCT_IMAGES:
-        raise HTTPException(409, "Limite de 12 imagens por produto. Remova uma imagem antes de adicionar outra.")
+
+    # The media binary AND the catalog reference are committed together. The
+    # previous two-step client process left saved files invisible on other PCs.
+    row = s.scalar(select(CatalogState).where(CatalogState.key == CATALOG_KEY).with_for_update())
+    payload = dict(row.payload or {}) if row else {}
+    media = dict(payload.get("media") or {})
+    entry = dict(media.get(body.product_id) or {})
+    photos = list(entry.get("photos") or [])
+    saved_count = s.scalar(select(func.count(ProductMedia.id)).where(ProductMedia.product_id == body.product_id)) or 0
+    if max(saved_count, len(photos)) >= MAX_PRODUCT_IMAGES:
+        raise HTTPException(409, "Limite de 12 imagens por produto. Remova uma antes de adicionar outra.")
     mid = str(uuid.uuid4())
     filename = Path(str(body.filename or "foto.jpg").replace("\\", "/")).name[:120]
+    url = _media_url(request, mid)
+    photos.append(url)
+    entry["photos"] = photos
+    media[body.product_id] = entry
+    payload["media"] = media
+    payload["lastEditedBy"] = user.get("full_name") or user.get("email") or "Usuário"
+    payload["lastEditedAt"] = utcnow().isoformat()
     s.add(ProductMedia(
         id=mid, product_id=body.product_id, filename=filename,
         content_type=ctype, content=raw,
         created_by=user.get("full_name") or user.get("email") or user.get("id"),
         created_at=utcnow(),
     ))
-    s.commit()
-    return {"id": mid, "product_id": body.product_id, "path": f"/media/{mid}", "content_type": ctype}
+    if row:
+        row.payload = payload
+        row.revision = int(row.revision or 0) + 1
+        row.updated_at = utcnow()
+    else:
+        s.add(CatalogState(key=CATALOG_KEY, payload=payload, revision=1, updated_at=utcnow()))
+    try:
+        s.commit()
+    except IntegrityError as exc:
+        s.rollback()
+        raise HTTPException(409, "Catálogo alterado simultaneamente. Repita o upload.") from exc
+    return {"id": mid, "product_id": body.product_id, "path": f"/media/{mid}", "url": url, "content_type": ctype}
 
 
 @app.get("/api/v1/media/{media_id}")
@@ -934,10 +1008,23 @@ def media_get(media_id: str, s: Session = Depends(db_session)):
 @app.delete("/api/v1/media/{media_id}")
 def media_delete(media_id: str, request: Request, s: Session = Depends(db_session)):
     _require_catalog(request, "write")
-    row = s.get(ProductMedia, media_id)
-    if not row:
+    image = s.get(ProductMedia, media_id)
+    if not image:
         raise HTTPException(404, "Imagem não encontrada")
-    s.delete(row); s.commit()
+    row = s.scalar(select(CatalogState).where(CatalogState.key == CATALOG_KEY).with_for_update())
+    if row:
+        payload = dict(row.payload or {})
+        media = dict(payload.get("media") or {})
+        entry = dict(media.get(image.product_id) or {})
+        photos = list(entry.get("photos") or [])
+        entry["photos"] = [p for p in photos if str(p).split("/media/")[-1].split("?")[0] != media_id]
+        media[image.product_id] = entry
+        payload["media"] = media
+        row.payload = payload
+        row.revision = int(row.revision or 0) + 1
+        row.updated_at = utcnow()
+    s.delete(image)
+    s.commit()
     return Response(status_code=204)
 
 
@@ -1229,7 +1316,7 @@ def integration_snapshot(request: Request, s: Session = Depends(db_session)):
         "clients": get("/clients", limit=500),
         "quotes": get("/quotes", limit=500),
         "orders": [_order_dict(x) for x in rows],
-        "catalog": _get_catalog_state(s),
+        "catalog": _catalog_with_persisted_media(s, request),
         "generated_at": utcnow().isoformat(),
         "source": "ERP principal + Gateway V5",
     }
@@ -1263,8 +1350,8 @@ def integration_upsert(body: UpsertInput, request: Request):
     return _json_response(status, data)
 
 
-def _public_products(s: Session) -> list[dict[str, Any]]:
-    state = _get_catalog_state(s).get("payload") or {}
+def _public_products(s: Session, request: Request) -> list[dict[str, Any]]:
+    state = _catalog_with_persisted_media(s, request).get("payload") or {}
     presentation = state.get("presentation") or {}
     media = state.get("media") or {}
     try:
@@ -1296,13 +1383,13 @@ def _public_products(s: Session) -> list[dict[str, Any]]:
 
 
 @app.get("/api/v1/public/catalog")
-def public_catalog(s: Session = Depends(db_session)):
-    return {"products": _public_products(s), "updated_at": utcnow().isoformat()}
+def public_catalog(request: Request, s: Session = Depends(db_session)):
+    return {"products": _public_products(s, request), "updated_at": utcnow().isoformat()}
 
 
 @app.get("/api/v1/public/catalog/{product_id}")
-def public_product(product_id: str, s: Session = Depends(db_session)):
-    for p in _public_products(s):
+def public_product(product_id: str, request: Request, s: Session = Depends(db_session)):
+    for p in _public_products(s, request):
         if p["id"] == product_id:
             return p
     raise HTTPException(404, "Produto não publicado")

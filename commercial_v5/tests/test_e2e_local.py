@@ -90,12 +90,21 @@ def check() -> None:
             assert photo_response.status_code == 200 and photo_response.headers["content-type"].startswith("image/jpeg")
             assert len(photo_response.content) > 100
             status = req("GET", "/catalog-management/state", headers=RH)
+            # Upload alone must atomically register the image in shared catalog:
+            # a different authenticated user sees it without any manual save.
+            assert photo["url"] == api + photo["path"]
+            assert photo["url"] in status["payload"]["media"][prod["id"]]["photos"]
+            from_another_pc = req("GET", "/catalog-management/state", headers=AH)
+            assert photo["url"] in from_another_pc["payload"]["media"][prod["id"]]["photos"]
             payload = {"presentation": {prod["id"]: {"title":"Sofá Milano Premium","published":True,"description":"Sofá confortável."}},"media":{prod["id"]:{"photos":[api+photo["path"]],"variantPhotos":{}}},"settings":{"minimumMargin":0},"operations":{"receivables":[{"amount":90000}]}}
             req("PUT", "/catalog-management/state", headers=RH, data={"payload":payload,"base_revision":status["revision"]})
             rv = req("GET", "/catalog-management/state", headers=RH)
             assert rv["payload"].get("settings",{}).get("minimumMargin") is None
             assert rv["payload"].get("operations") is None
             assert rv["payload"]["presentation"][prod["id"]]["title"] == "Sofá Milano Premium"
+            # Links saved on the old Render domain still resolve through the
+            # current deployment, in catalog, modal and product card.
+            assert photo["url"] in rv["payload"]["media"][prod["id"]]["photos"]
             req("PUT", "/catalog-management/state", headers=RH, data={"payload":payload,"base_revision":0}, status=409)
             req("PUT", "/catalog-management/state", headers=RH, data={"payload":payload}, status=428)
             published = req("GET", "/public/catalog")["products"]
@@ -115,6 +124,19 @@ def check() -> None:
             for _ in range(11):
                 req("POST", "/media", headers=RH, data={"product_id":prod["id"],"filename":"extra.png","data_url":"data:image/png;base64,"+base64.b64encode(img).decode()})
             req("POST", "/media", headers=RH, data={"product_id":prod["id"],"filename":"extra.png","data_url":"data:image/png;base64,"+base64.b64encode(img).decode()}, status=409)
+            # Deleting an image removes both the bytes and shared reference.
+            req("DELETE", "/media/" + photo["id"], headers=RH, status=204)
+            assert len(req("GET", "/catalog-management/state", headers=AH)["payload"]["media"][prod["id"]]["photos"]) == 11
+            assert cli.get(api + photo["path"]).status_code == 404
+            # PNG with transparent background stays transparent in the DB.
+            alpha_img = io.BytesIO()
+            Image.new("RGBA", (32, 32), (0, 0, 0, 0)).save(alpha_img, format="PNG")
+            transparent = req("POST", "/media", headers=RH, data={"product_id":prod["id"],"filename":"recorte.png","data_url":"data:image/png;base64,"+base64.b64encode(alpha_img.getvalue()).decode()})
+            transparent_response = cli.get(api+transparent["path"])
+            assert transparent_response.status_code == 200
+            assert transparent_response.headers["content-type"].startswith("image/png")
+            assert Image.open(io.BytesIO(transparent_response.content)).convert("RGBA").getpixel((0, 0))[3] == 0
+            assert len(req("GET", "/catalog-management/state", headers=AH)["payload"]["media"][prod["id"]]["photos"]) == 12
             # Cliente e pedido financeiro/produção usam ERP real de teste.
             client = req("POST", "/clients", headers=SH, data={"name":"Cliente Teste","phone":"11999999999"}, status=201)
             order = req("POST", "/sales-orders", headers=SH, data={"client_id":client["id"],"client_name":client["name"],"payment_method":"PIX","delivery_address":"Rua Teste, 123","discount":0,"freight":50,"items":[{"product_id":pid,"description":"Sofá de teste","quantity":2,"unit_price":2500,"discount_percent":0}]},status=201)

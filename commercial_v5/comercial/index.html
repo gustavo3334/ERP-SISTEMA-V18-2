@@ -172,6 +172,13 @@ body{background:var(--market-bg)}
 @media(max-width:900px){.form-grid.three,.form-grid.four,.margin-preview,.client-address-grid,.report-funnel{grid-template-columns:1fr 1fr}.client-address-grid .wide{grid-column:auto}}
 @media(max-width:600px){.form-grid.three,.form-grid.four,.margin-preview,.client-address-grid,.report-funnel{grid-template-columns:1fr}.role-dashboard{align-items:flex-start}.market-hero{padding:24px 18px!important}.market-copy h2{font-size:30px!important}.info-card{min-height:170px}.content{padding-bottom:76px!important}}
 </style>
+
+<style id="studio-media-upload-fix">
+.studio-pending-photo{position:relative;border:2px dashed #2563eb;background:#eff6ff;min-height:132px}
+.studio-pending-photo img{width:100%;height:115px;object-fit:contain}
+.studio-upload-label{font-size:11px;font-weight:650;color:#1d4ed8;padding:6px 8px;overflow-wrap:anywhere}
+.studio-upload-error{color:#b91c1c}
+</style>
 </head>
 <body>
   <div id="toastRoot" class="toast-root"></div>
@@ -563,9 +570,15 @@ async function loadCatalogState(){
   try{
     let d;
     try{d=await API.request("/catalog-management/state")}
-    catch{d=await API.request(`/front-state/${encodeURIComponent(CFG.STATE_KEY)}`)}
-    state.catalog=d.payload&&Object.keys(d.payload).length?d.payload:{};state.catalogRevision=d.revision||0;ensureCatalog();
-  }catch(e){console.warn(e);ensureCatalog()}
+    catch(err){
+      // Only old gateways use front-state; network/permission/429 errors must
+      // never silently load a different catalog from another persistence layer.
+      if(err.status!==404)throw err;
+      d=await API.request(`/front-state/${encodeURIComponent(CFG.STATE_KEY)}`);
+    }
+    if(!d||!d.payload||typeof d.payload!=="object")throw new Error("O catálogo compartilhado retornou dados inválidos.");
+    state.catalog=d.payload;state.catalogRevision=Number(d.revision)||0;ensureCatalog();
+  }catch(e){console.warn("Falha ao sincronizar catálogo compartilhado",e);throw e}
 }
 async function saveCatalogState(){
   ensureCatalog();
@@ -878,7 +891,7 @@ function renderCatalogManager(){
       <div class="status-tabs">
         ${[["all","Todos"],["no-photo","Sem foto"],["incomplete","Incompletos"],["ready","Prontos"],["published","Publicados"]].map(([v,l])=>`<button class="status-tab ${state.catalogManagerFilter===v?"active":""}" data-action="catalog-filter" data-filter="${v}">${l}</button>`).join("")}
       </div>
-      <input id="bulkCatalogInput" type="file" accept="image/*" multiple hidden>
+      <input id="bulkCatalogInput" type="file" accept="image/jpeg,image/png,image/webp" multiple hidden>
     </div>
     <div class="catalog-product-list">${rows.map(p=>{const r=catalogReadiness(p),src=mediaFor(p.id)[0];return `
       <div class="catalog-product-row">
@@ -894,7 +907,7 @@ function renderStudio(){
   if(!canManageCatalog()){go("catalogo");return}
   const selected=state.studioProductId||state.products[0]?.id||"";state.studioProductId=selected;const p=state.products.find(x=>x.id===selected),pres=p?presentationFor(p.id):{},photos=p?mediaFor(p.id):[],vars=p?state.variants.filter(v=>v.product_id===p.id):[];
   $("#appContent").innerHTML=pageHead("STUDIO DE PRODUTOS","Conteúdo comercial e mídia","Produto técnico continua no ERP; aqui você controla como ele aparece para o vendedor.",`${hasPermission("settings.write")?`<button class="secondary-btn" data-action="new-product">＋ Produto no ERP</button>`:""}<button class="primary-btn" data-action="save-studio">Salvar catálogo</button>`)+`
-  <div class="catalog-role-banner">Selecione um produto do ERP, envie fotos, defina a capa (primeira foto), preencha a descrição e clique em <strong>Salvar catálogo</strong>. Para divulgar no site, marque <strong>Publicado</strong>. Até 12 fotos por produto.</div><div class="studio-layout"><div class="panel"><div class="toolbar"><select id="studioProductSelect" class="grow">${state.products.map(x=>`<option value="${esc(x.id)}" ${x.id===selected?"selected":""}>${esc(x.code)} — ${esc(x.name)}</option>`).join("")}</select></div>${p?`
+  <div class="catalog-role-banner">As fotos aparecem assim que você escolhe os arquivos e são salvas diretamente no banco compartilhado. O botão <strong>Salvar catálogo</strong> guarda os demais dados do produto. Para divulgar no site, marque <strong>Publicado</strong>. Até 12 fotos por produto.</div><div class="studio-layout"><div class="panel"><div class="toolbar"><select id="studioProductSelect" class="grow">${state.products.map(x=>`<option value="${esc(x.id)}" ${x.id===selected?"selected":""}>${esc(x.code)} — ${esc(x.name)}</option>`).join("")}</select></div>${p?`
     <div class="form-grid">
       <div class="field full"><label>Nome comercial</label><input id="studioTitle" value="${esc(pres.title||p.name)}"></div>
       <div class="field full"><label>Subtítulo</label><input id="studioSubtitle" value="${esc(pres.subtitle||[p.color,p.size].filter(Boolean).join(" • "))}"></div>
@@ -906,7 +919,7 @@ function renderStudio(){
       <div class="field full"><label>Destaques / benefícios</label><input id="studioHighlights" value="${esc((pres.highlights||[]).join(", "))}" placeholder="estrutura reforçada, fácil abertura, tecido premium"></div>
       <div class="field full"><label>Tags</label><input id="studioTags" value="${esc((pres.tags||[]).join(", "))}"></div>
     </div>
-    <div style="margin-top:18px"><div class="panel-head"><div><h3>Galeria principal</h3><small>Até ${CFG.MAX_PHOTOS_PER_PRODUCT} imagens • arraste para reorganizar</small></div></div><div class="dropzone"><strong>Adicionar fotos reais</strong><p class="help">Escolha várias imagens ou, no celular, use a câmera. A primeira imagem é a capa.</p><div class="actions" style="justify-content:center"><label class="primary-btn" style="cursor:pointer">Escolher fotos<input id="studioPhotoInput" type="file" accept="image/*" multiple hidden></label><label class="secondary-btn" style="cursor:pointer">Tirar foto<input id="studioCameraInput" type="file" accept="image/*" capture="environment" hidden></label></div></div><div class="media-grid">${photos.map((src,i)=>`<div class="media-item" draggable="true" data-media-index="${i}"><img src="${safePhotoUrl(src)}">${i===0?`<span class="cover-tag">CAPA</span>`:""}<div class="media-tools"><button data-action="photo-cover" data-index="${i}" title="Definir como capa">★</button><button data-action="photo-left" data-index="${i}" title="Mover para esquerda">‹</button><button data-action="photo-right" data-index="${i}" title="Mover para direita">›</button><button data-action="remove-photo" data-index="${i}" title="Excluir">×</button></div></div>`).join("")||`<div class="empty-state">Sem fotos.</div>`}</div></div>
+    <div style="margin-top:18px"><div class="panel-head"><div><h3>Galeria principal</h3><small>Até ${CFG.MAX_PHOTOS_PER_PRODUCT} imagens • arraste para reorganizar</small></div></div><div class="dropzone"><strong>Adicionar fotos reais</strong><p class="help">Escolha várias imagens ou, no celular, use a câmera. A primeira imagem é a capa.</p><div class="actions" style="justify-content:center"><label class="primary-btn" style="cursor:pointer">Escolher fotos<input id="studioPhotoInput" type="file" accept="image/*" multiple hidden></label><label class="secondary-btn" style="cursor:pointer">Tirar foto<input id="studioCameraInput" type="file" accept="image/jpeg,image/png,image/webp" capture="environment" hidden></label></div></div><div class="media-grid">${photos.map((src,i)=>`<div class="media-item" draggable="true" data-media-index="${i}"><img src="${safePhotoUrl(src)}">${i===0?`<span class="cover-tag">CAPA</span>`:""}<div class="media-tools"><button data-action="photo-cover" data-index="${i}" title="Definir como capa">★</button><button data-action="photo-left" data-index="${i}" title="Mover para esquerda">‹</button><button data-action="photo-right" data-index="${i}" title="Mover para direita">›</button><button data-action="remove-photo" data-index="${i}" title="Excluir">×</button></div></div>`).join("")||`<div class="empty-state">Sem fotos.</div>`}</div></div>
     <div style="margin-top:18px"><div class="panel-head"><div><h3>Variações</h3><small>Cor / tamanho / SKU / estoque</small></div></div><div class="table-wrap"><table><thead><tr><th>SKU</th><th>Cor</th><th>Tamanho</th><th>Estoque</th><th>Preço</th><th>Mídia</th></tr></thead><tbody>${vars.map(v=>`<tr><td>${esc(v.sku)}</td><td>${esc(v.color||"—")}</td><td>${esc(v.size||"—")}</td><td>${available(p,v.id)}</td><td>${fmtBRL(v.price||p.price)}</td><td><button class="secondary-btn" data-action="variant-media" data-id="${esc(v.id)}">${mediaForVariant(p.id,v.id).length} foto(s)</button></td></tr>`).join("")||`<tr><td colspan="6">Sem variações.</td></tr>`}</tbody></table></div></div>
     `:`<div class="empty-state">Cadastre produtos no ERP.</div>`}</div>
     <aside class="panel studio-side">${p?`<div class="panel-head"><div><h3>Prévia</h3><small>Como aparece no catálogo</small></div></div>${productCard(p)}<div class="health-grid" style="grid-template-columns:1fr;margin-top:12px"><div class="health-card ok"><span>Estoque</span><strong>${available(p)} disponível</strong></div><div class="health-card"><span>Preço</span><strong>${fmtBRL(promoPrice(p))}</strong></div>${canSeeCost()?`<div class="health-card"><span>Margem estimada</span><strong>${p.price?(((Number(p.price)-Number(p.cost||0))/Number(p.price))*100).toFixed(1):0}%</strong></div>`:""}</div>`:""}</aside>
@@ -1169,22 +1182,101 @@ async function fileToDataUrl(file){
 async function uploadErpMedia(file,productId){
   const dataUrl=await fileToDataUrl(file);
   const result=await API.request("/media",{method:"POST",body:JSON.stringify({product_id:productId,filename:file.name||"foto.jpg",data_url:dataUrl})});
-  return `${API.base()}${result.path.startsWith("/api/v1/")?result.path.slice(7):result.path}`;
+  return result.url || `${API.base()}${result.path.startsWith("/api/v1/")?result.path.slice(7):result.path}`;
 }
 async function deleteErpMedia(src){
-  if(state.demo||!src||!API.base())return;
-  const prefix=`${API.base()}/media/`;
-  if(!src.startsWith(prefix))return;
-  const id=src.slice(prefix.length).split(/[?#]/)[0];
-  if(id)await API.request(`/media/${encodeURIComponent(id)}`,{method:"DELETE"}).catch(()=>{});
+  if(state.demo||!src||!API.base())return false;
+  // Also recognizes URLs written by the previous Comercial service (same DB).
+  // All DELETE requests go to the CURRENT authenticated API, never to old hosts.
+  const match=String(src).match(/\/api\/v1\/media\/([a-f0-9-]{36})(?:[?#]|$)/i);
+  if(!match)return false;
+  await API.request(`/media/${encodeURIComponent(match[1])}`,{method:"DELETE"});
+  return true;
 }
 async function storePhoto(file,productId){
-  const provider=localStorage.getItem("fp_storage_provider")||CFG.STORAGE.provider||"erp_api";
   if(state.demo)return fileToDataUrl(file);
-  if(provider==="supabase")return uploadSupabase(file,productId);
-  if(provider==="erp_state")return uploadErpMedia(file,productId);
+  // All real accounts, browsers and computers must use the SAME persistent
+  // database-backed media service, not per-browser localStorage preferences.
   return uploadErpMedia(file,productId);
 }
+
+const STUDIO_DRAFT_FIELDS=["studioTitle","studioSubtitle","studioStatus","studioFeatured","studioPublished","studioWarranty","studioDescription","studioHighlights","studioTags"];
+function captureStudioDraft(){
+  const draft={product:state.studioProductId,values:{}};
+  for(const id of STUDIO_DRAFT_FIELDS){const e=document.getElementById(id);if(e)draft.values[id]=e.value}
+  return draft;
+}
+function restoreStudioDraft(draft){
+  if(!draft||draft.product!==state.studioProductId)return;
+  for(const [id,value] of Object.entries(draft.values||{})){const e=document.getElementById(id);if(e)e.value=value}
+}
+async function addStudioPhotos(files, input){
+  const product=state.products.find(x=>x.id===state.studioProductId);
+  if(!product)return;
+  const current=mediaFor(product.id);
+  const selected=[...files].slice(0,Math.max(0,CFG.MAX_PHOTOS_PER_PRODUCT-current.length));
+  if(!selected.length){toast("O produto já tem o limite de 12 fotos.","error");return}
+  const draft=captureStudioDraft();
+  const grid=document.querySelector(".media-grid");
+  const empty=grid?.querySelector(".empty-state");if(empty)empty.remove();
+  const previews=[];
+  for(const file of selected){
+    if(!file.type.startsWith("image/")){toast(`Formato inválido: ${file.name}`,"error");continue}
+    const objectUrl=URL.createObjectURL(file);
+    const el=document.createElement("div");el.className="media-item studio-pending-photo";
+    const image=document.createElement("img");image.src=objectUrl;image.alt=file.name;
+    const label=document.createElement("div");label.className="studio-upload-label";label.textContent=`Enviando: ${file.name}`;
+    el.append(image,label);grid?.append(el);
+    previews.push({file,objectUrl,el,label});
+  }
+  const chooser=input;
+  if(chooser)chooser.disabled=true;
+  let saved=0;
+  const savedUrls=[];
+  try{
+    for(const preview of previews){
+      try{
+        if(!state.demo){
+          const url=await storePhoto(preview.file,product.id); // backend persists reference atomically
+          savedUrls.push(url);
+        }else{
+          state.catalog.media[product.id]||={photos:[],variantPhotos:{}};
+          state.catalog.media[product.id].photos.push(await storePhoto(preview.file,product.id));
+        }
+        saved++;
+        preview.label.textContent=`Salva: ${preview.file.name}`;
+      }catch(err){
+        preview.label.textContent=`Falha: ${preview.file.name}`;
+        preview.label.classList.add("studio-upload-error");
+        toast(`Não foi possível salvar ${preview.file.name}: ${err.message||err}`,"error");
+      }
+    }
+    if(saved){
+      let synchronized=true;
+      if(state.demo)await saveCatalogState();
+      else{
+        try{await loadCatalogState()} // all clients read shared Postgres catalog
+        catch(err){
+          synchronized=false;
+          // The POST already committed on the server; preserve its returned
+          // links on screen if the following GET is temporarily unavailable.
+          state.catalog.media[product.id]||={photos:[],variantPhotos:{}};
+          const photos=state.catalog.media[product.id].photos;
+          for(const url of savedUrls)if(!photos.includes(url))photos.push(url);
+          toast(`Fotos gravadas no servidor, mas a atualização da tela falhou: ${err.message||err}`,"error");
+        }
+      }
+      renderStudio();
+      restoreStudioDraft(draft);
+      if(synchronized)toast(`${saved} foto(s) salva(s) no servidor e disponíveis no catálogo.`);
+    }
+  }finally{
+    if(chooser)chooser.value="";
+    for(const preview of previews)URL.revokeObjectURL(preview.objectUrl);
+    if(!saved)for(const preview of previews)preview.el.remove();
+  }
+}
+
 async function saveStudio(){
   const p=state.products.find(x=>x.id===state.studioProductId);if(!p)return;
   if(!canManageCatalog())throw new Error("Sem permissão para editar o catálogo.");
@@ -1262,7 +1354,12 @@ function roleDashboardHtml(){const role=String(state.user?.role||"Administrador"
 async function handleProductImportInput(file){if(!file)return;await importProductFile(file)}
 function bind(){
   document.addEventListener("click",async e=>{
-    const route=e.target.closest("[data-route]");if(route){go(route.dataset.route);return}
+    const route=e.target.closest("[data-route]");if(route){
+      if(!state.demo&&["inicio","catalogo","studio","catalog-manager"].includes(route.dataset.route)){
+        try{await loadCatalogState()}catch(err){toast(`Não foi possível atualizar as fotos: ${err.message||err}`,"error")}
+      }
+      go(route.dataset.route);return
+    }
     if(e.target.closest("[data-close-modal]")){closeModal();return}if(e.target.closest("[data-close-drawer]")){closeCart();return}
     const gallery=e.target.closest("[data-gallery-src]");if(gallery){$("#galleryMain img").src=gallery.dataset.gallerySrc;return}
     const cat=e.target.closest("[data-category]");if(cat){state.filters.category=cat.dataset.category;state.filters.page=1;go("catalogo");return}
@@ -1290,7 +1387,16 @@ function bind(){
       else if(a==="photo-cover"){const arr=mediaFor(state.studioProductId),i=Number(btn.dataset.index);if(i>0){arr.unshift(arr.splice(i,1)[0]);logHistory("CAPA","Produto",state.products.find(p=>p.id===state.studioProductId)?.name||"");await saveCatalogState();renderStudio()}}
       else if(a==="photo-left"){const arr=mediaFor(state.studioProductId),i=Number(btn.dataset.index);if(i>0){[arr[i-1],arr[i]]=[arr[i],arr[i-1]];await saveCatalogState();renderStudio()}}
       else if(a==="photo-right"){const arr=mediaFor(state.studioProductId),i=Number(btn.dataset.index);if(i<arr.length-1){[arr[i+1],arr[i]]=[arr[i],arr[i+1]];await saveCatalogState();renderStudio()}}
-      else if(a==="remove-photo"){const arr=mediaFor(state.studioProductId),i=Number(btn.dataset.index),src=arr[i];arr.splice(i,1);await deleteErpMedia(src);await saveCatalogState();renderStudio()}
+      else if(a==="remove-photo"){
+        const i=Number(btn.dataset.index),src=mediaFor(state.studioProductId)[i];
+        if(state.demo){mediaFor(state.studioProductId).splice(i,1);await saveCatalogState()}
+        else if(src){
+          const dbDeleted=await deleteErpMedia(src);
+          if(dbDeleted)await loadCatalogState();
+          else{mediaFor(state.studioProductId).splice(i,1);await saveCatalogState()}
+        }
+        renderStudio()
+      }
       else if(a==="variant-media"){toast("Selecione a variação no detalhe do produto para usar a mídia específica.")}
       else if(a==="new-promo")newPromo();
       else if(a==="toggle-promo"){const p=state.catalog.promotions.find(x=>x.id===id);if(p)p.active=!p.active;await saveCatalogState();renderPromocoes()}
@@ -1353,8 +1459,7 @@ function bind(){
     if(e.target.id==="cartClient"){state.selectedClient=state.clients.find(x=>x.id===e.target.value)||null;state.clientPriceCache={};renderCart()}
     if(e.target.id==="cartPayment"){state.cartMeta.payment=e.target.value}
     if(e.target.id==="studioPhotoInput"||e.target.id==="studioCameraInput"){
-      const p=state.products.find(x=>x.id===state.studioProductId);if(!p)return;state.catalog.media[p.id]||={photos:[],variantPhotos:{}};const arr=state.catalog.media[p.id].photos,files=[...e.target.files].slice(0,Math.max(0,CFG.MAX_PHOTOS_PER_PRODUCT-arr.length));
-      for(const f of files){try{arr.push(await storePhoto(f,p.id))}catch(err){toast(err.message,"error")}}logHistory("MÍDIA","Produto",`${p.name}: ${files.length} arquivo(s)`);await saveCatalogState();renderStudio()
+      try{await addStudioPhotos(e.target.files||[],e.target)}catch(err){toast(`Erro ao atualizar galeria: ${err.message||err}`,"error")}
     }
     if(e.target.id==="productImportFile"){await handleProductImportInput(e.target.files?.[0]);e.target.value=""}
     if(e.target.id==="bulkCatalogInput"){
