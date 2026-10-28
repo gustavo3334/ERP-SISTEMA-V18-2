@@ -729,8 +729,13 @@ def _catalog_with_persisted_media(s: Session, request: Request) -> dict[str, Any
         canonical = _media_url(request, image.id)
         matching = [i for i, src in enumerate(photos) if str(src).split("/media/")[-1].split("?")[0] == image.id]
         if matching:
-            if photos[matching[0]] != canonical:
-                photos[matching[0]] = canonical
+            previous = str(photos[matching[0]])
+            # Keep a revision query for updated media content; the image URL
+            # might otherwise remain cached for 24h on another device.
+            suffix = previous[previous.index("?v="):] if "?v=" in previous else ""
+            normalized = canonical + suffix
+            if photos[matching[0]] != normalized:
+                photos[matching[0]] = normalized
                 dirty = True
         elif len(photos) < MAX_PRODUCT_IMAGES:
             photos.append(canonical)
@@ -912,6 +917,10 @@ class MediaInput(BaseModel):
     data_url: str
 
 
+class MediaReplaceInput(MediaInput):
+    index: int
+
+
 def _decode_data_url(value: str) -> tuple[str, bytes]:
     if len(value or "") > (MAX_IMAGE_BYTES * 4 // 3 + 200):
         raise HTTPException(413, "Imagem ultrapassa limite permitido")
@@ -995,6 +1004,72 @@ def media_upload(body: MediaInput, request: Request, s: Session = Depends(db_ses
         s.rollback()
         raise HTTPException(409, "Catálogo alterado simultaneamente. Repita o upload.") from exc
     return {"id": mid, "product_id": body.product_id, "path": f"/media/{mid}", "url": url, "content_type": ctype}
+
+
+@app.post("/api/v1/media/replace")
+def media_replace(body: MediaReplaceInput, request: Request, s: Session = Depends(db_session)):
+    """Replace one gallery image atomically without changing product data.
+
+    Existing shared PostgreSQL media IDs are reused to avoid exceeding the
+    twelve-photo limit. External legacy URLs receive a new stored media row.
+    """
+    user = _require_catalog(request, "write")
+    ctype, raw = _decode_data_url(body.data_url)
+    if not body.product_id or len(body.product_id) > 64 or body.index < 0 or body.index >= MAX_PRODUCT_IMAGES:
+        raise HTTPException(422, "Produto ou posição de foto inválidos")
+    product_status, _, _ = _erp_call("GET", f"/products/{body.product_id}", token=_service_token())
+    if product_status >= 400:
+        raise HTTPException(404, "Produto não encontrado no ERP")
+    row = s.scalar(select(CatalogState).where(CatalogState.key == CATALOG_KEY).with_for_update())
+    if not row:
+        raise HTTPException(404, "Catálogo ainda não cadastrado")
+    payload = dict(row.payload or {})
+    media = dict(payload.get("media") or {})
+    entry = dict(media.get(body.product_id) or {})
+    photos = list(entry.get("photos") or [])
+    if body.index >= len(photos):
+        raise HTTPException(409, "Galeria alterada. Atualize a página antes de substituir a imagem")
+    old_url = str(photos[body.index])
+    old_match = re.search(r"/api/v1/media/([a-f0-9-]{36})(?:[?#]|$)", old_url, re.I)
+    old = s.get(ProductMedia, old_match.group(1)) if old_match else None
+    if old and old.product_id != body.product_id:
+        raise HTTPException(403, "A foto não pertence a esse produto")
+    filename = Path(str(body.filename or "foto.jpg").replace("\\", "/")).name[:120]
+    if old:
+        old.filename = filename
+        old.content_type = ctype
+        old.content = raw
+        old.created_by = user.get("full_name") or user.get("email") or user.get("id")
+        media_id = old.id
+    else:
+        saved_count = s.scalar(select(func.count(ProductMedia.id)).where(ProductMedia.product_id == body.product_id)) or 0
+        if saved_count >= MAX_PRODUCT_IMAGES:
+            raise HTTPException(409, "Limite de imagens atingido; exclua uma imagem antiga antes de substituir")
+        media_id = str(uuid.uuid4())
+        s.add(ProductMedia(
+            id=media_id, product_id=body.product_id, filename=filename,
+            content_type=ctype, content=raw,
+            created_by=user.get("full_name") or user.get("email") or user.get("id"),
+            created_at=utcnow(),
+        ))
+    version = uuid.uuid4().hex[:12]
+    url = f"{_media_url(request, media_id)}?v={version}"
+    photos[body.index] = url
+    entry["photos"] = photos
+    media[body.product_id] = entry
+    payload["media"] = media
+    payload["lastEditedBy"] = user.get("full_name") or user.get("email") or "Usuário"
+    payload["lastEditedAt"] = utcnow().isoformat()
+    row.payload = payload
+    row.revision = int(row.revision or 0) + 1
+    row.updated_at = utcnow()
+    try:
+        s.commit()
+    except IntegrityError as exc:
+        s.rollback()
+        raise HTTPException(409, "O catálogo foi alterado simultaneamente. Repita a operação") from exc
+    return {"id": media_id, "product_id": body.product_id, "index": body.index, "url": url,
+            "revision": row.revision, "content_type": ctype}
 
 
 @app.get("/api/v1/media/{media_id}")
