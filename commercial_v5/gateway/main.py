@@ -21,6 +21,7 @@ from typing import Any
 import httpx
 from fastapi import Depends, FastAPI, HTTPException, Request, Response
 from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 from PIL import Image, UnidentifiedImageError
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
@@ -770,13 +771,28 @@ def catalog_products(request: Request):
     user = _require_catalog(request, "read")
     token = _token_from_request(request)
     # Usa conta de integração se o ERP negar leitura de produto ao RH.
+    # PORTO_VELHO_CATALOGO_PAGINACAO_V2
     def get(path: str):
-        status, data, meta = _erp_call("GET", path, token=token, params={"limit": 500})
-        if status in (401, 403):
-            status, data, meta = _erp_call("GET", path, token=_service_token(), params={"limit": 500})
-        if status >= 400:
-            raise HTTPException(status, data.get("detail") if isinstance(data, dict) else "Erro no ERP", headers={"Retry-After": meta.get("Retry-After", "3")} if status == 429 else None)
-        return data
+        """O ERP limita cada página a 500; varre TODAS as páginas."""
+        rows = []
+        for offset in range(0, 20000, 500):
+            status, data, meta = _erp_call(
+                "GET", path, token=token, params={"limit": 500, "offset": offset}
+            )
+            if status in (401, 403):
+                status, data, meta = _erp_call(
+                    "GET", path, token=_service_token(),
+                    params={"limit": 500, "offset": offset}
+                )
+            if status >= 400:
+                detail = data.get("detail") if isinstance(data, dict) else "Erro no ERP"
+                raise HTTPException(status, detail, headers={"Retry-After": meta.get("Retry-After", "30")} if status == 429 else None)
+            if not isinstance(data, list):
+                raise HTTPException(502, "ERP retornou lista de produtos incompatível")
+            rows.extend(data)
+            if len(data) < 500:
+                return rows
+        raise HTTPException(503, "Catálogo ultrapassou o limite de páginas; contate o suporte")
     products = get("/products")
     hide = _normalize_role(user.get("role")) not in {"administrator", "admin", "manager", "gerente", "finance"}
     products = [_sanitized_product(dict(p), hide_cost=hide) for p in products]
@@ -1430,7 +1446,17 @@ def _public_products(s: Session, request: Request) -> list[dict[str, Any]]:
     presentation = state.get("presentation") or {}
     media = state.get("media") or {}
     try:
-        products = _erp_json("GET", "/products", token=_service_token(), params={"limit": 500})
+        # PORTO_VELHO_PUBLICO_PAGINADO_V2
+        products = []
+        for offset in range(0, 20000, 500):
+            page = _erp_json("GET", "/products", token=_service_token(), params={"limit": 500, "offset": offset})
+            if not isinstance(page, list):
+                raise HTTPException(502, "Resposta inválida do catálogo público")
+            products.extend(page)
+            if len(page) < 500:
+                break
+        else:
+            raise HTTPException(503, "Catálogo público excedeu o limite de páginas")
     except Exception as exc:
         logger.warning("Catálogo público: falha ao consultar ERP: %s", type(exc).__name__)
         raise HTTPException(503, "Catálogo temporariamente indisponível. Tente novamente.") from exc
@@ -1481,3 +1507,10 @@ def root():
 @app.get("/site-demo.html", include_in_schema=False)
 def site_preview():
     return FileResponse(WEB_ROOT / "site-demo.html", media_type="text/html")
+
+
+# PORTO_VELHO_STATIC_ASSETS_V2
+# As fotos são servidas do próprio deploy, e não do disco local do vendedor.
+_PV_IMAGES = WEB_ROOT / "pv_assets"
+if _PV_IMAGES.is_dir():
+    app.mount("/pv-assets", StaticFiles(directory=str(_PV_IMAGES)), name="porto_velho_catalogo_imagens")
