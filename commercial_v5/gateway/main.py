@@ -1544,6 +1544,16 @@ if _COMMERCIAL_ASSETS.is_dir():
     app.mount("/assets", StaticFiles(directory=str(_COMMERCIAL_ASSETS)), name="facil_pedido_interface_assets")
 
 
+@app.get("/api/v1/porto-velho/vitrine", include_in_schema=False)
+def porto_velho_vitrine(request: Request):
+    """Consulta visual pré-importação; não cria produtos, preços nem estoque no ERP."""
+    _require_catalog(request, "read")
+    path = WEB_ROOT / "pv_showcase.json"
+    if not path.is_file():
+        raise HTTPException(404, "Vitrine Porto Velho indisponível")
+    return FileResponse(path, media_type="application/json", headers={"Cache-Control": "private, max-age=3600"})
+
+
 @app.get("/api/v1/porto-velho/referencias", include_in_schema=False)
 def porto_velho_referencias(request: Request):
     _require_catalog(request,"read")

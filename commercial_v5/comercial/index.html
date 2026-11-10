@@ -154,6 +154,33 @@ body{background:var(--market-bg)}
 
 .pv-ref-images{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-top:12px}.pv-ref-card{display:flex;flex-direction:column;gap:7px;padding:8px;background:white;border:1px solid #e2e8f0;border-radius:10px}.pv-ref-card img{width:100%;height:138px;object-fit:contain;border-radius:7px;background:#f6f6f4}.pv-ref-card small{color:#64748b;line-height:1.35}.pv-ref-card button{padding:8px;font-size:12px}.pv-modal-grid{grid-template-columns:repeat(auto-fill,minmax(180px,1fr));max-height:55vh;overflow:auto;padding:3px}.pv-modal-grid img{height:154px}.pv-ref-panel .actions{gap:8px}
 .pv-gallery-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:15px;max-height:57vh;overflow:auto}.pv-gallery-page{border:1px solid #dce6ed;padding:10px;border-radius:12px;background:#fff;min-width:0;display:flex;flex-direction:column;gap:5px}.pv-gallery-page small{color:#637087}.pv-gallery-triplet{display:grid;grid-template-columns:2fr 1fr 1fr;gap:5px;min-width:0}.pv-gallery-triplet img{display:block;width:100%;height:145px;object-fit:contain;background:#f4f5f7;border-radius:6px}.pv-gallery-triplet a{min-width:0;display:block}@media(max-width:720px){.pv-gallery-grid{grid-template-columns:1fr}.pv-gallery-triplet img{height:118px}}
+
+/* Porto Velho integrada à vitrine: itens de consulta nunca entram no carrinho do ERP. */
+.pv-showcase-card .product-photo{cursor:pointer}
+.pv-showcase-card .product-photo img{width:100%;height:100%;object-fit:contain;background:#f6f7f8}
+.pv-showcase-card .product-actions{opacity:1!important}
+.pv-showcase-note{font-size:11px;color:#58677b;line-height:1.45;margin:8px 0 12px}
+.pv-showcase-price-label{font-size:9px;color:#667085;margin-top:6px}
+.pv-showcase-banner{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 15px;background:#f2f7ff;border:1px solid #d5e5fb;border-radius:10px;margin-bottom:12px;font-size:11px}
+.pv-showcase-banner strong{display:block;font-size:12px}
+.pv-showcase-featured{margin-top:14px}
+.pv-showcase-featured .catalog-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+.pv-showcase-detail .gallery-main{height:300px}
+.pv-showcase-detail .gallery-thumbs{display:flex;gap:7px;overflow:auto;margin-top:10px}
+.pv-showcase-detail .gallery-thumbs img{width:75px;height:58px;object-fit:contain}
+/* Exclusão gerenciada: arquivos de referência permanecem no pacote original. */
+.media-tools button.media-delete-btn{position:static!important;min-width:72px!important;width:auto!important;height:26px!important;border-radius:6px!important;padding:0 6px!important;background:#b42318!important;color:#fff!important;font-weight:800!important;white-space:nowrap}
+.media-tools button.media-delete-btn:hover,.pv-delete-photo:hover{background:#912018!important;color:white!important}
+.media-tools{flex-wrap:wrap}.media-tools button{flex:none}
+.pv-delete-photo{background:#fff1f1!important;border:1px solid #fecdca!important;color:#b42318!important;font-size:11px!important;font-weight:800!important;white-space:nowrap}
+.pv-ref-thumb-group{display:flex;flex-direction:column;gap:5px;align-items:center;flex:0 0 100px}
+.pv-ref-thumb-group .gallery-thumb{width:90px;height:75px}
+.pv-ref-thumb-group .pv-delete-photo{padding:5px 8px;font-size:9px!important;border-radius:6px}
+.pv-no-image{width:100%;height:100%;min-height:130px;display:grid;place-items:center;background:#f2f4f7;color:#64748b;font-size:12px;font-weight:700;text-align:center;padding:14px}
+.pv-reference-admin{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+
+@media(max-width:1050px){.pv-showcase-featured .catalog-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media(max-width:640px){.pv-showcase-banner{flex-direction:column;align-items:flex-start}.pv-showcase-featured .catalog-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.pv-showcase-card .product-actions{opacity:1!important}}
 </style>
 <style id="fp-v4-css">
 .ops-dashboard{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin-bottom:14px}.ops-kpi{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:var(--shadow)}.ops-kpi small{display:block;color:var(--muted);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.4px}.ops-kpi strong{display:block;font-size:20px;margin-top:6px}.ops-kpi em{display:block;color:var(--muted);font-size:8px;margin-top:4px;font-style:normal}.ops-toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}.ops-toolbar .grow{flex:1;min-width:220px}.ops-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.ops-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:var(--shadow)}.ops-card h3{font-size:13px;margin-bottom:5px}.ops-card p,.ops-card small{font-size:9px;color:var(--muted);line-height:1.5}.ops-card .big{font-size:22px;font-weight:900;color:var(--text);margin:8px 0}.ops-progress{height:8px;background:#eef2f6;border-radius:99px;overflow:hidden;margin:8px 0}.ops-progress span{display:block;height:100%;background:var(--accent);border-radius:99px}.status-line{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px}.form-note{background:#f8fafc;border:1px solid var(--line);padding:10px;border-radius:10px;color:var(--muted);font-size:9px;line-height:1.5}.zero-banner{background:#fff8e6;border:1px solid #ffd666;border-radius:12px;padding:11px 13px;margin-bottom:12px;font-size:9px;color:#7a4d00}.price-pair{display:grid;grid-template-columns:1fr 1fr;gap:8px}.perm-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.perm-chip{padding:8px;border:1px solid var(--line);border-radius:9px;font-size:9px;background:#fafafa}.money-positive{color:#039855}.money-negative{color:#d92d20}.ops-empty{padding:32px;text-align:center;border:1px dashed var(--line);border-radius:14px;color:var(--muted);background:#fff}.ops-empty strong{display:block;color:var(--text);font-size:12px;margin-bottom:5px}.danger-zone{border:1px solid #fda29b;background:#fff6f5;border-radius:12px;padding:12px;margin-top:14px}.dashboard-quick{display:flex;gap:7px;flex-wrap:wrap;margin:-4px 0 14px}.dashboard-quick button{font-size:9px}.table-wrap td .actions{flex-wrap:wrap}.modal-card.wide{max-width:900px}.checkbox-row{display:flex;align-items:center;gap:8px;font-size:9px}.checkbox-row input{width:auto}.stock-qty{font-weight:900;font-size:13px}.audit-row{font-size:9px}.metric-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:10px 0 14px}.metric-strip .panel{padding:12px}.pipeline-mini{display:flex;gap:6px;overflow:auto;padding-bottom:4px}.pipeline-mini .chip{white-space:nowrap}.readonly-cost{background:#f2f4f7;color:#667085}.field .hint{font-size:8px;color:var(--muted);margin-top:4px;display:block}
@@ -475,6 +502,107 @@ function demoData(){
   ensureCatalog();
 }
 
+// Vitrine de consulta: produtos da tabela Porto Velho ainda não cadastrados no ERP.
+// Nenhum item PV-CAT é enviado ao carrinho, estoque, pedidos ou gravação no ERP.
+const pvShowcase={ready:false,loading:false,rows:[],error:"",sourceDate:"2026-09-29"};
+function pvShowcaseRows(){
+  const registered=new Set(state.products.map(p=>pvNorm(p.code||p.sku)).filter(Boolean));
+  const unmatched=pvShowcase.rows.filter(p=>!registered.has(pvNorm(p.code)));
+  // Na primeira página mostrar modelos diferentes antes das variações de cor.
+  const seen=new Set(),first=[],variations=[];
+  for(const p of unmatched){
+    if(!seen.has(p.catalog_page)){first.push(p);seen.add(p.catalog_page)}
+    else variations.push(p);
+  }
+  return first.concat(variations);
+}
+function pvReferenceSourcePhotos(p){
+  return [...new Set([p.cover,...(p.photos||[])].filter(path=>pvAssetLocation(path)))];
+}
+function pvReferenceVisiblePhotos(p){
+  const hidden=new Set(state.catalog?.media?.[p.id]?.hiddenReferencePhotos||[]);
+  return pvReferenceSourcePhotos(p).filter(path=>!hidden.has(path));
+}
+function pvReferenceCover(p){return pvReferenceVisiblePhotos(p)[0]||""}
+async function pvHidePhoto(id,path){
+  if(!canManageCatalog())throw new Error("Você não tem permissão para excluir fotos.");
+  const p=pvShowcase.rows.find(x=>x.id===id);
+  if(!p||!pvReferenceSourcePhotos(p).includes(path))throw new Error("Foto inválida ou não encontrada.");
+  if(!confirm(`Excluir esta foto da vitrine do produto "${p.name}"?\n\nO arquivo original do PDF será preservado e poderá ser restaurado.`))return;
+  ensureCatalog();
+  const current=state.catalog.media[id]||{};
+  const old=[...(current.hiddenReferencePhotos||[])];
+  current.hiddenReferencePhotos=[...new Set([...old,path])];
+  state.catalog.media[id]=current;
+  try{await saveCatalogState()}
+  catch(err){current.hiddenReferencePhotos=old;throw err}
+  toast("Foto excluída da vitrine. Original preservado.");
+  if(document.querySelector(".pv-showcase-detail"))pvReferenceDetail(id);
+  else render();
+}
+async function pvRestorePhotos(id){
+  if(!canManageCatalog())throw new Error("Sem permissão para restaurar fotos.");
+  const p=pvShowcase.rows.find(x=>x.id===id);
+  if(!p)throw new Error("Produto não encontrado.");
+  if(!confirm(`Restaurar todas as fotos originais de "${p.name}" na vitrine?`))return;
+  ensureCatalog();
+  const entry=state.catalog.media[id]||{};
+  const old=[...(entry.hiddenReferencePhotos||[])];
+  entry.hiddenReferencePhotos=[];state.catalog.media[id]=entry;
+  try{await saveCatalogState()}catch(err){entry.hiddenReferencePhotos=old;throw err}
+  toast("Fotos originais restauradas.");
+  if(document.querySelector(".pv-showcase-detail"))pvReferenceDetail(id);
+  else render();
+}
+function pvShowcaseHomeRows(limit=8){
+  const used=new Set();const rows=[];
+  for(const p of pvShowcaseRows()){
+    if(p.review_needed||used.has(p.catalog_page)||!pvReferenceCover(p))continue;
+    used.add(p.catalog_page);rows.push(p);
+    if(rows.length>=limit)break;
+  }
+  return rows;
+}
+function pvAssetLocation(src){
+  const path=String(src||"");
+  if(!/^pv-assets\/(cover|page|inset)-\d{3}\.jpg$/.test(path))return "";
+  const prefix=location.pathname.startsWith("/comercial")?"/comercial/":"/";
+  return prefix+path;
+}
+async function loadPvShowcase(){
+  if(pvShowcase.ready||pvShowcase.loading||state.demo)return;
+  pvShowcase.loading=true;
+  try{
+    const data=await API.request("/porto-velho/vitrine");
+    if(!Array.isArray(data.products))throw new Error("Formato inválido do catálogo Porto Velho");
+    pvShowcase.sourceDate=String(data.price_date||"2026-09-29");
+    pvShowcase.rows=data.products.filter(r=>r.name && pvAssetLocation(r.cover)).map(r=>({
+      id:`PV-CAT-${r.id}`,code:String(r.sku||""),name:String(r.name),category_id:`PV::${r.category}`,
+      category_name:String(r.category),color:String(r.color||""),price:Number(r.price||0),
+      description:String(r.description||""),catalog_page:Number(r.catalog_page),
+      cover:String(r.cover),photos:Array.isArray(r.photos)?r.photos.filter(x=>pvAssetLocation(x)):[],
+      review_needed:!!r.review_needed,_pvReference:true
+    }));
+    pvShowcase.ready=true;pvShowcase.error="";
+    if(["inicio","catalogo"].includes(state.route) && !["INPUT","TEXTAREA"].includes(document.activeElement?.tagName))render();
+  }catch(err){pvShowcase.error=String(err.message||err);console.warn("Vitrine Porto Velho indisponível:",err)}
+  finally{pvShowcase.loading=false}
+}
+function pvReferencePrice(p){return p.review_needed||!(p.price>0)?"Valor a conferir":fmtBRL(p.price)}
+function pvReferenceDetail(id){
+  const p=pvShowcase.rows.find(x=>x.id===id);if(!p)return;
+  const photos=pvReferenceVisiblePhotos(p),imgs=photos.map(pvAssetLocation);
+  const removed=(state.catalog?.media?.[p.id]?.hiddenReferencePhotos||[]).length;
+  $("#modalRoot").innerHTML=`<div class="modal-overlay"><div class="modal-card wide pv-showcase-detail"><div class="modal-head"><div><h3>${esc(p.name)}</h3><p>${esc(p.category_name)} • Ref. ${esc(p.code)} • Página ${p.catalog_page}</p></div><button class="icon-btn" data-close-modal>×</button></div>
+    <div class="modal-body"><div class="product-detail"><div><div class="gallery-main" id="galleryMain">${imgs.length?`<img src="${esc(imgs[0])}" alt="${esc(p.name)}">`:`<div class="pv-no-image">Este modelo está sem fotos na vitrine.</div>`}</div><div class="gallery-thumbs">${photos.map(path=>`<div class="pv-ref-thumb-group"><button class="gallery-thumb" data-gallery-src="${esc(pvAssetLocation(path))}"><img loading="lazy" decoding="async" src="${esc(pvAssetLocation(path))}" alt="Foto de ${esc(p.name)}"></button>${canManageCatalog()?`<button class="pv-delete-photo" data-action="pv-hide-photo" data-id="${esc(p.id)}" data-photo="${esc(path)}">Excluir foto</button>`:""}</div>`).join("")}</div>${canManageCatalog()&&removed?`<div class="actions" style="margin-top:12px"><button class="secondary-btn" data-action="pv-restore-photos" data-id="${esc(p.id)}">Restaurar fotos (${removed})</button></div>`:""}</div>
+    <div class="detail-info"><span class="chip blue">Porto Velho · referência do catálogo</span><h2>${esc(p.name)}</h2><div class="detail-price">${esc(pvReferencePrice(p))}</div><div class="pv-showcase-price-label">Tabela de 29/09/2026; confirme o preço de venda no ERP</div><p class="pv-showcase-note">${esc(p.description)}</p><p class="pv-showcase-note">Este modelo está disponível para consulta visual, mas ainda não possui cadastro de venda vinculado ao ERP. Estoque, preço final e pedido só poderão ser usados após o cadastro.</p><div class="actions"><button class="secondary-btn" data-close-modal>Fechar</button>${canManageCatalog()?`<button class="primary-btn" data-action="pv-go-manager">Gerenciar cadastro no ERP</button>`:""}</div></div></div></div></div></div>`;
+  $("#modalRoot").classList.add("show");
+}
+function pvReferenceCard(p){
+  const cover=pvReferenceCover(p),source=pvAssetLocation(cover);
+  return `<article class="product-card pv-showcase-card"><div class="product-photo" data-action="pv-reference-detail" data-id="${esc(p.id)}">${source?`<img loading="lazy" decoding="async" src="${esc(source)}" alt="${esc(p.name)}">`:`<div class="pv-no-image">Sem foto • restaurável</div>`}</div><div class="product-card-body"><div class="product-meta"><span class="chip blue">${esc(p.category_name)}</span><span class="chip">Consulta Porto Velho</span></div><h3>${esc(p.name)}</h3><div class="product-sub">${esc(p.color||p.code)}</div><div class="product-price">${esc(pvReferencePrice(p))}</div><div class="pv-showcase-price-label">Referência da tabela · 29/09/2026</div><div class="product-actions"><button class="secondary-btn full" data-action="pv-reference-detail" data-id="${esc(p.id)}">Ver fotos e detalhes</button>${canManageCatalog()&&cover?`<button class="pv-delete-photo" data-action="pv-hide-photo" data-id="${esc(p.id)}" data-photo="${esc(cover)}">Excluir foto</button>`:""}${canManageCatalog()&&!cover?`<button class="secondary-btn" data-action="pv-restore-photos" data-id="${esc(p.id)}">Restaurar fotos</button>`:""}</div></div></article>`;
+}
+
 // Banco de referências Porto Velho extraído dos PDFs. As sugestões não alteram preço/estoque no ERP.
 const pvRef={ready:false,rows:[],byCode:new Map(),byName:new Map(),suggestions:new Map()};
 const pvNorm=value=>norm(value).replace(/[^a-z0-9]+/g," ").trim().replace(/\s+/g," ");
@@ -609,7 +737,7 @@ function safePhotoUrl(value){
   try{const url=new URL(src,location.href);if(["https:","http:"].includes(url.protocol))return esc(url.href)}catch{}
   return "";
 }
-function photoFor(p,variantId=null){return safePhotoUrl((variantId?mediaForVariant(p.id,variantId)[0]:null)||mediaFor(p.id)[0]||pvAutoPhoto(p)||demoPhoto(p.name||"Móvel"))}
+function photoFor(p,variantId=null){if(p._pvReference)return safePhotoUrl(pvAssetLocation(pvReferenceCover(p)));return safePhotoUrl((variantId?mediaForVariant(p.id,variantId)[0]:null)||mediaFor(p.id)[0]||pvAutoPhoto(p)||demoPhoto(p.name||"Móvel"))}
 function presentationFor(id){ensureCatalog();return state.catalog.presentation[id]||{}}
 function categoryName(p){return p.category_name||state.categories.find(c=>c.id===p.category_id)?.name||"Sem categoria"}
 function locationName(id){const x=state.locations.find(l=>l.id===id);return x?.name||x?.address_code||"Não informado"}
@@ -802,6 +930,7 @@ function showApp(){
   const requested=location.hash.replace("#/","");
   go(requested&&document.querySelector(`[data-route="${requested}"]:not(.hidden)`)?requested:defaultRoute());
   loadPvReference();
+  loadPvShowcase();
   const shared=new URL(location.href).searchParams.get("catalog");
   if(shared){state.presentationIds=shared.split(",").filter(id=>state.products.some(p=>p.id===id));if(state.presentationIds.length)setTimeout(()=>startPresentation(state.presentationIds),150)}
 }
@@ -826,6 +955,7 @@ function priceDisplay(p){
   const final=clientV??current;return {base:Number(p.price||0),final,promo,client:clientV!=null&&clientV!==Number(p.price||0)}
 }
 function productCard(p){
+  if(p._pvReference)return pvReferenceCard(p);
   const pres=presentationFor(p.id),fav=state.favorites.has(p.id),a=available(p),pr=priceDisplay(p),status=pres.status||"Ativo";
   return `<article class="product-card">
     <button class="favorite ${fav?"active":""}" data-action="favorite" data-id="${esc(p.id)}">${fav?"♥":"♡"}</button>
@@ -893,6 +1023,8 @@ function renderInicio(){
   const featured=state.products.filter(p=>presentationFor(p.id).featured&&presentationFor(p.id).published!==false).slice(0,4);
   const heroProducts=(featured.length?featured:state.products.slice(0,4));
   const deals=state.products.filter(p=>presentationFor(p.id).published!==false).slice(0,4);
+  const pvDeals=pvShowcaseHomeRows(12);
+  const pvHero=pvDeals[0]||null;
   const low=state.products.filter(p=>available(p)<=Number(p.min_stock||2)).length;
   const quoteTotal=state.quotes.reduce((s,q)=>s+Number(q.total||0),0),orderTotal=state.orders.reduce((s,o)=>s+Number(o.total||0),0);
   const cards=[
@@ -926,14 +1058,15 @@ function renderInicio(){
       <div class="market-sections">
         <div class="section-card">
           <div class="strip-header"><div><h3>Oferta do dia</h3><div class="subline">Produto em destaque para acelerar a venda</div></div></div>
-          ${heroProducts[0]?`<div class="mini-offer"><div class="offer-image"><img loading="lazy" decoding="async" src="${photoFor(heroProducts[0])}" alt="${esc(heroProducts[0].name)}"></div><div class="offer-body"><span class="chip blue">${esc(categoryName(heroProducts[0]))}</span><strong style="font-size:16px;display:block;margin-top:10px">${esc(heroProducts[0].name)}</strong><div class="price">${fmtBRL(priceDisplay(heroProducts[0]).final)}</div><div class="pix">${available(heroProducts[0])} unidade(s) disponível(is)</div><div class="actions" style="margin-top:12px"><button class="secondary-btn" data-action="detail" data-id="${heroProducts[0].id}">Ver produto</button><button class="primary-btn" data-action="add" data-id="${heroProducts[0].id}">Adicionar</button></div></div></div>`:`<div class="empty-state">Sem produto em destaque.</div>`}
+          ${pvHero?`<div class="mini-offer"><div class="offer-image"><img loading="eager" decoding="async" src="${esc(pvAssetLocation(pvReferenceCover(pvHero)))}" alt="${esc(pvHero.name)}"></div><div class="offer-body"><span class="chip blue">Porto Velho • catálogo visual</span><strong style="font-size:16px;display:block;margin-top:10px">${esc(pvHero.name)}</strong><div class="price">${esc(pvReferencePrice(pvHero))}</div><div class="pv-showcase-price-label">Preço de referência de 29/09/2026 • consulte antes de vender</div><div class="actions" style="margin-top:12px"><button class="secondary-btn" data-action="pv-reference-detail" data-id="${esc(pvHero.id)}">Ver fotos e detalhes</button>${canManageCatalog()?`<button class="pv-delete-photo" data-action="pv-hide-photo" data-id="${esc(pvHero.id)}" data-photo="${esc(pvReferenceCover(pvHero))}">Excluir foto</button>`:""}</div></div></div>`:heroProducts[0]?`<div class="mini-offer"><div class="offer-image"><img loading="lazy" decoding="async" src="${photoFor(heroProducts[0])}" alt="${esc(heroProducts[0].name)}"></div><div class="offer-body"><span class="chip blue">${esc(categoryName(heroProducts[0]))}</span><strong style="font-size:16px;display:block;margin-top:10px">${esc(heroProducts[0].name)}</strong><div class="price">${fmtBRL(priceDisplay(heroProducts[0]).final)}</div><div class="pix">${available(heroProducts[0])} unidade(s) disponível(is)</div><div class="actions" style="margin-top:12px"><button class="secondary-btn" data-action="detail" data-id="${heroProducts[0].id}">Ver produto</button><button class="primary-btn" data-action="add" data-id="${heroProducts[0].id}">Adicionar</button></div></div></div>`:`<div class="empty-state">Sem produto em destaque.</div>`}
         </div>
         <div class="section-card">
-          <div class="strip-header"><div><h3>Ofertas e vitrine</h3><div class="subline">Móveis, preço e estoque em um formato de e-commerce</div></div><a href="#/catalogo">Mostrar todos</a></div>
-          <div class="deal-carousel">${deals.map(p=>`<div class="deal-item"><div class="thumb-top"><img loading="lazy" decoding="async" src="${photoFor(p)}" alt="${esc(p.name)}"></div><div class="body"><strong>${esc(p.name)}</strong><small>${esc(categoryName(p))}</small><div class="deal-price">${fmtBRL(priceDisplay(p).final)}</div><div class="ship">${available(p)>0?`${available(p)} un. disponíveis`:'Sob consulta'}</div><div class="actions" style="margin-top:10px"><button class="secondary-btn" data-action="detail" data-id="${p.id}">Detalhes</button><button class="primary-btn" data-action="add" data-id="${p.id}">Adicionar</button></div></div></div>`).join('')}</div>
+          <div class="strip-header"><div><h3>Ofertas e vitrine Porto Velho</h3><div class="subline">Fotos dos móveis já na página inicial; valores de referência até confirmação no ERP</div></div><a href="#/catalogo">Ver catálogo completo</a></div>
+          ${pvDeals.length?`<div class="deal-carousel">${pvDeals.slice(0,4).map(p=>`<div class="deal-item"><div class="thumb-top" data-action="pv-reference-detail" data-id="${esc(p.id)}"><img loading="lazy" decoding="async" src="${esc(pvAssetLocation(pvReferenceCover(p)))}" alt="${esc(p.name)}"></div><div class="body"><strong>${esc(p.name)}</strong><small>${esc(p.category_name)}</small><div class="deal-price">${esc(pvReferencePrice(p))}</div><div class="pv-showcase-price-label">Tabela 29/09/2026</div><div class="actions" style="margin-top:10px"><button class="secondary-btn" data-action="pv-reference-detail" data-id="${esc(p.id)}">Ver detalhes</button>${canManageCatalog()?`<button class="pv-delete-photo" data-action="pv-hide-photo" data-id="${esc(p.id)}" data-photo="${esc(pvReferenceCover(p))}">Excluir foto</button>`:""}</div></div></div>`).join('')}</div>`:`<div class="deal-carousel">${deals.map(p=>`<div class="deal-item"><div class="thumb-top"><img loading="lazy" decoding="async" src="${photoFor(p)}" alt="${esc(p.name)}"></div><div class="body"><strong>${esc(p.name)}</strong><small>${esc(categoryName(p))}</small><div class="deal-price">${fmtBRL(priceDisplay(p).final)}</div><div class="ship">${available(p)>0?`${available(p)} un. disponíveis`:'Sob consulta'}</div><div class="actions" style="margin-top:10px"><button class="secondary-btn" data-action="detail" data-id="${p.id}">Detalhes</button><button class="primary-btn" data-action="add" data-id="${p.id}">Adicionar</button></div></div></div>`).join('')}</div>`}
         </div>
       </div>
 
+      ${pvDeals.length?`<div class="section-card pv-showcase-featured"><div class="strip-header"><div><h3>Explore os móveis Porto Velho</h3><div class="subline">Imagens dos modelos, características e referência de preços — tudo na página inicial</div></div><a href="#/catalogo">Ver todas as opções</a></div><div class="catalog-grid" style="margin-top:14px">${pvDeals.slice(4,12).map(pvReferenceCard).join("")}</div></div>`:""}
       <div class="section-card">
         <div class="strip-header"><div><h3>Resumo e categorias</h3><div class="subline">Informações para o vendedor começar o atendimento</div></div><a href="#/relatorios">Ver relatórios</a></div>
         <div class="mini-offer-grid">
@@ -945,11 +1078,13 @@ function renderInicio(){
 }
 
 function filteredProducts(){
-  let rows=[...state.products].filter(p=>p.active!==false&&presentationFor(p.id).published!==false);
+  const registered=state.products.filter(p=>p.active!==false&&presentationFor(p.id).published!==false);
+  const previews=pvShowcaseRows();
+  let rows=previews.length?[...previews,...registered]:registered;
   const q=norm(state.filters.q);if(q)rows=rows.filter(p=>norm([p.name,p.code,p.color,p.size,categoryName(p),presentationFor(p.id).subtitle,(presentationFor(p.id).tags||[]).join(" ")].join(" ")).includes(q));
   if(state.filters.category)rows=rows.filter(p=>p.category_id===state.filters.category);
-  if(state.filters.stock==="available")rows=rows.filter(p=>available(p)>0);
-  if(state.filters.stock==="critical")rows=rows.filter(p=>available(p)<=Number(p.min_stock||2));
+  if(state.filters.stock==="available")rows=rows.filter(p=>!p._pvReference&&available(p)>0);
+  if(state.filters.stock==="critical")rows=rows.filter(p=>!p._pvReference&&available(p)<=Number(p.min_stock||2));
   if(state.filters.favorites)rows=rows.filter(p=>state.favorites.has(p.id));
   // No catálogo MOCK de testes, coloque os móveis Porto Velho antes do único sofá fictício.
   if(state.filters.sort==="relevance" && rows.some(p=>String(p.id||"").startsWith("PVTEST-")))
@@ -961,15 +1096,16 @@ function filteredProducts(){
 }
 function renderCatalogo(){
   const all=filteredProducts(),pages=Math.max(1,Math.ceil(all.length/CFG.PAGE_SIZE));state.filters.page=clamp(state.filters.page,1,pages);const start=(state.filters.page-1)*CFG.PAGE_SIZE,rows=all.slice(start,start+CFG.PAGE_SIZE);
-  $("#appContent").innerHTML=pageHead("CATÁLOGO","Encontre o produto ideal",state.selectedClient?`Preço personalizado para ${state.selectedClient.name}.`:"Selecione um cliente para aplicar tabela de preço específica.",`<button class="primary-btn" data-action="open-product-form">＋ Cadastrar móvel</button><button class="secondary-btn" data-action="pv-gallery">🖼 Ver 888 fotos Porto Velho</button><button class="secondary-btn" data-action="toggle-favorites">${state.filters.favorites?"Ver todos":"Favoritos"}</button>${canManageCatalog()?`<button class="primary-btn" data-route="studio">＋ Produto / fotos</button>`:""}`)+`
+  $("#appContent").innerHTML=pageHead("CATÁLOGO","Encontre o produto ideal",state.selectedClient?`Preço personalizado para ${state.selectedClient.name}.`:"Selecione um cliente para aplicar tabela de preço específica.",`<button class="primary-btn" data-action="open-product-form">＋ Cadastrar móvel</button><button class="secondary-btn" data-action="toggle-favorites">${state.filters.favorites?"Ver todos":"Favoritos"}</button>${canManageCatalog()?`<button class="primary-btn" data-route="studio">＋ Produto / fotos</button>`:""}`)+`
   <div class="catalog-layout"><aside class="filter-panel">
     <div class="filter-section"><strong>Cliente atual</strong>${state.selectedClient?`<span class="chip green">${esc(state.selectedClient.name)}</span><button class="ghost-btn full" style="margin-top:8px" data-action="clear-client">Trocar cliente</button>`:`<button class="primary-btn full" data-route="clientes">Selecionar cliente</button>`}</div>
-    <div class="filter-section"><strong>Categorias</strong><label><input type="radio" name="cat" value="" ${!state.filters.category?"checked":""}> Todas</label>${state.categories.map(c=>`<label><input type="radio" name="cat" value="${esc(c.id)}" ${state.filters.category===c.id?"checked":""}> ${esc(c.name)}</label>`).join("")}</div>
+    <div class="filter-section"><strong>Categorias</strong><label><input type="radio" name="cat" value="" ${!state.filters.category?"checked":""}> Todas</label>${[...state.categories,...[...new Set(pvShowcaseRows().map(p=>p.category_name))].sort((a,b)=>a.localeCompare(b,"pt-BR")).map(n=>({id:`PV::${n}`,name:n}))].map(c=>`<label><input type="radio" name="cat" value="${esc(c.id)}" ${state.filters.category===c.id?"checked":""}> ${esc(c.name)}</label>`).join("")}</div>
     <div class="filter-section"><strong>Estoque</strong><label><input type="radio" name="stock" value="all" ${state.filters.stock==="all"?"checked":""}> Todos</label><label><input type="radio" name="stock" value="available" ${state.filters.stock==="available"?"checked":""}> Em estoque</label><label><input type="radio" name="stock" value="critical" ${state.filters.stock==="critical"?"checked":""}> Crítico</label></div>
     <div class="filter-section"><strong>Venda rápida</strong><button class="ghost-btn full" data-action="scan">▥ Ler código</button></div>
   </aside><div>
     <div class="toolbar"><input class="grow" id="catalogSearch" value="${esc(state.filters.q)}" placeholder="Sofá cinza 2,30, SKU, código..."><select id="catalogSort"><option value="relevance">Mais relevantes</option><option value="name">Nome A–Z</option><option value="priceAsc">Menor preço</option><option value="priceDesc">Maior preço</option></select></div>
-    <div class="result-meta">Mostrando ${rows.length?start+1:0}–${start+rows.length} de ${all.length} produto(s)</div>
+    ${pvShowcase.ready?`<div class="pv-showcase-banner"><div><strong>Catálogo Porto Velho integrado: ${pvShowcaseRows().length} referências com fotos</strong><span>Esses móveis aparecem junto aos produtos reais, com valores da tabela de 29/09/2026. Antes de vender, confirme cadastro, estoque e preço no ERP.</span></div><button class="secondary-btn" data-route="catalog-manager">Gerenciar no ERP</button></div>`:""}
+    <div class="result-meta">Mostrando ${rows.length?start+1:0}–${start+rows.length} de ${all.length} opção(ões) • ${state.products.length} produto(s) cadastrado(s) no ERP</div>
     <div class="catalog-grid">${rows.map(productCard).join("")||`<div class="empty-state">Nenhum produto encontrado.</div>`}</div>
     <div class="pagination">${Array.from({length:pages},(_,i)=>i+1).slice(Math.max(0,state.filters.page-3),Math.max(5,state.filters.page+2)).map(p=>`<button class="${p===state.filters.page?"active":""}" data-action="page" data-page="${p}">${p}</button>`).join("")}</div>
   </div></div>`;$("#catalogSort").value=state.filters.sort;
@@ -1044,7 +1180,7 @@ function renderStudio(){
       <div class="field full"><label>Destaques / benefícios</label><input id="studioHighlights" value="${esc((pres.highlights||[]).join(", "))}" placeholder="estrutura reforçada, fácil abertura, tecido premium"></div>
       <div class="field full"><label>Tags</label><input id="studioTags" value="${esc((pres.tags||[]).join(", "))}"></div>
     </div>
-    <div style="margin-top:18px"><div class="panel-head"><div><h3>Galeria principal</h3><small>Até ${CFG.MAX_PHOTOS_PER_PRODUCT} imagens • arraste para reorganizar</small></div></div><div class="dropzone"><strong>Adicionar fotos reais</strong><p class="help">Escolha várias imagens ou, no celular, use a câmera. A primeira imagem é a capa.</p><div class="actions" style="justify-content:center"><label class="primary-btn" style="cursor:pointer">Escolher fotos<input id="studioPhotoInput" type="file" accept="image/*" multiple hidden></label><label class="secondary-btn" style="cursor:pointer">Tirar foto<input id="studioCameraInput" type="file" accept="image/*" capture="environment" hidden></label></div></div><div class="media-grid">${photos.map((src,i)=>`<div class="media-item" draggable="true" data-media-index="${i}"><img src="${safePhotoUrl(src)}">${i===0?`<span class="cover-tag">CAPA</span>`:""}<div class="media-tools"><label class="media-replace-btn" title="Trocar esta foto">Trocar<input type="file" accept="image/jpeg,image/png,image/webp" data-replace-photo="${i}" hidden></label><button data-action="photo-cover" data-index="${i}" title="Definir como capa">★</button><button data-action="photo-left" data-index="${i}" title="Mover para esquerda">‹</button><button data-action="photo-right" data-index="${i}" title="Mover para direita">›</button><button data-action="remove-photo" data-index="${i}" title="Excluir">×</button></div></div>`).join("")||`<div class="empty-state">Sem fotos.</div>`}</div></div>
+    <div style="margin-top:18px"><div class="panel-head"><div><h3>Galeria principal</h3><small>Até ${CFG.MAX_PHOTOS_PER_PRODUCT} imagens • arraste para reorganizar</small></div></div><div class="dropzone"><strong>Adicionar fotos reais</strong><p class="help">Escolha várias imagens ou, no celular, use a câmera. A primeira imagem é a capa.</p><div class="actions" style="justify-content:center"><label class="primary-btn" style="cursor:pointer">Escolher fotos<input id="studioPhotoInput" type="file" accept="image/*" multiple hidden></label><label class="secondary-btn" style="cursor:pointer">Tirar foto<input id="studioCameraInput" type="file" accept="image/*" capture="environment" hidden></label></div></div><div class="media-grid">${photos.map((src,i)=>`<div class="media-item" draggable="true" data-media-index="${i}"><img src="${safePhotoUrl(src)}">${i===0?`<span class="cover-tag">CAPA</span>`:""}<div class="media-tools"><label class="media-replace-btn" title="Trocar esta foto">Trocar<input type="file" accept="image/jpeg,image/png,image/webp" data-replace-photo="${i}" hidden></label><button data-action="photo-cover" data-index="${i}" title="Definir como capa">★</button><button data-action="photo-left" data-index="${i}" title="Mover para esquerda">‹</button><button data-action="photo-right" data-index="${i}" title="Mover para direita">›</button><button class="media-delete-btn" data-action="remove-photo" data-index="${i}" title="Excluir esta foto do produto" aria-label="Excluir foto ${i+1}">Excluir foto</button></div></div>`).join("")||`<div class="empty-state">Sem fotos.</div>`}</div></div>
     ${pvStudioControls(p)}
      <div style="margin-top:18px"><div class="panel-head"><div><h3>Variações</h3><small>Cor / tamanho / SKU / estoque</small></div></div><div class="table-wrap"><table><thead><tr><th>SKU</th><th>Cor</th><th>Tamanho</th><th>Estoque</th><th>Preço</th><th>Mídia</th></tr></thead><tbody>${vars.map(v=>`<tr><td>${esc(v.sku)}</td><td>${esc(v.color||"—")}</td><td>${esc(v.size||"—")}</td><td>${available(p,v.id)}</td><td>${fmtBRL(v.price||p.price)}</td><td><button class="secondary-btn" data-action="variant-media" data-id="${esc(v.id)}">${mediaForVariant(p.id,v.id).length} foto(s)</button></td></tr>`).join("")||`<tr><td colspan="6">Sem variações.</td></tr>`}</tbody></table></div></div>
     `:`<div class="empty-state">Cadastre produtos no ERP.</div>`}</div>
@@ -1432,6 +1568,10 @@ function bind(){
     const btn=e.target.closest("[data-action]");if(!btn)return;const a=btn.dataset.action,id=btn.dataset.id;
     try{
       if(a==="detail")await openProduct(id);
+      else if(a==="pv-reference-detail")pvReferenceDetail(id);
+      else if(a==="pv-hide-photo")await pvHidePhoto(id,btn.dataset.photo||"");
+      else if(a==="pv-restore-photos")await pvRestorePhotos(id);
+      else if(a==="pv-go-manager"){closeModal();go("catalog-manager")}
       else if(a==="choose-variant")await openProduct(btn.dataset.product,id);
       else if(a==="add")await addToCart(id,btn.dataset.variant||null);
       else if(a==="favorite"){state.favorites.has(id)?state.favorites.delete(id):state.favorites.add(id);persistFavorites();render()}
@@ -1465,14 +1605,25 @@ function bind(){
       else if(a==="photo-left"){const arr=mediaFor(state.studioProductId),i=Number(btn.dataset.index);if(i>0){[arr[i-1],arr[i]]=[arr[i],arr[i-1]];await saveCatalogState();renderStudio()}}
       else if(a==="photo-right"){const arr=mediaFor(state.studioProductId),i=Number(btn.dataset.index);if(i<arr.length-1){[arr[i+1],arr[i]]=[arr[i],arr[i+1]];await saveCatalogState();renderStudio()}}
       else if(a==="remove-photo"){
-        const arr=mediaFor(state.studioProductId),i=Number(btn.dataset.index),src=arr[i];
-        if(!src)throw new Error("Imagem inexistente");
-        if(arr.length===1 && presentationFor(state.studioProductId).published===true)throw new Error("Despublique o produto antes de excluir a última foto.");
-        const media=state.catalog.media[state.studioProductId],wasDisabled=!!media.disableReference;
-        arr.splice(i,1);
-        if(!arr.length)media.disableReference=true;
-        try{await saveCatalogState()}catch(e){arr.splice(i,0,src);media.disableReference=wasDisabled;throw e}
-        await deleteErpMedia(src);renderStudio();toast("Foto removida do catálogo");
+        if(!canManageCatalog())throw new Error("Sem permissão para excluir fotos.");
+        const productId=state.studioProductId,arr=mediaFor(productId),i=Number(btn.dataset.index),src=arr[i];
+        if(!src)throw new Error("Imagem inexistente. Atualize o Studio.");
+        if(arr.length===1 && presentationFor(productId).published===true)throw new Error("Despublique o produto antes de excluir a última foto.");
+        if(!confirm(`Excluir esta foto do produto?${i===0?"\\nA próxima imagem passará a ser a capa.":""}\\n\\nO produto, seu preço e seu estoque serão preservados.`))return;
+        const draft={};for(const field of ["studioTitle","studioSubtitle","studioStatus","studioFeatured","studioPublished","studioWarranty","studioDescription","studioHighlights","studioTags"]){const el=document.getElementById(field);if(el)draft[field]=el.value}
+        const uploadedId=String(src).match(/\/api\/v1\/media\/([a-f0-9-]{36})(?:[?#]|$)/i);
+        if(!state.demo&&uploadedId){
+          // Backend removes the media row and its catalog link in one transaction.
+          await deleteErpMedia(src);
+        }else{
+          // Static PDF reference/external photo: only detach, never delete shared assets.
+          const media=state.catalog.media[productId]||={photos:[],variantPhotos:{}},wasDisabled=!!media.disableReference;
+          arr.splice(i,1);
+          if(!arr.length)media.disableReference=true;
+          try{await saveCatalogState()}catch(e){arr.splice(i,0,src);media.disableReference=wasDisabled;throw e}
+        }
+        renderStudio();for(const [field,value] of Object.entries(draft)){const el=document.getElementById(field);if(el)el.value=value}
+        toast("Foto excluída do produto. Nome, preço e estoque preservados.");
       }
       else if(a==="variant-media"){toast("Selecione a variação no detalhe do produto para usar a mídia específica.")}
       else if(a==="new-promo")newPromo();
