@@ -626,7 +626,7 @@ for _res in PROXY_RESOURCES:
                     body = await request.json()
                 except Exception:
                     body = None
-            return _proxy_collection(resource, request, request.method, body)
+            return await run_in_threadpool(_proxy_collection, resource, request, request.method, body)
         endpoint.__name__ = f"proxy_{resource.replace('-', '_')}_collection"
         return endpoint
 
@@ -638,7 +638,7 @@ for _res in PROXY_RESOURCES:
                     body = await request.json()
                 except Exception:
                     body = None
-            return _proxy_item(resource, item_id, request, request.method, body)
+            return await run_in_threadpool(_proxy_item, resource, item_id, request, request.method, body)
         endpoint.__name__ = f"proxy_{resource.replace('-', '_')}_item"
         return endpoint
 
@@ -692,7 +692,7 @@ def inventory_balances(request: Request):
 
 @app.post("/api/v1/inventory/balances")
 async def inventory_balance_save(request: Request):
-    user = _current_user(request)
+    user = await run_in_threadpool(_current_user, request)
     if _normalize_role(user.get("role")) not in {"administrator", "admin", "manager", "gerente", "stock", "estoque"}:
         raise HTTPException(403, "Sem permissão para movimentar estoque")
     token = _token_from_request(request)
@@ -706,7 +706,7 @@ async def inventory_balance_save(request: Request):
         "reason": body.get("reason") or "Ajuste pelo Fácil Pedido Comercial",
         "notes": body.get("notes") or "Sincronizado pelo gateway V5",
     }
-    status, data, _ = _erp_call("POST", "/stock/adjust", token=token, body=payload)
+    status, data, _ = await run_in_threadpool(_erp_call, "POST", "/stock/adjust", token=token, body=payload)
     if status >= 400:
         return _json_response(status, data)
     return body
@@ -852,7 +852,7 @@ def catalog_state_get(request: Request, s: Session = Depends(db_session)):
 
 @app.put("/api/v1/catalog-management/state")
 async def catalog_state_put(request: Request, s: Session = Depends(db_session)):
-    user = _current_user(request)
+    user = await run_in_threadpool(_current_user, request)
     role = _normalize_role(user.get("role"))
     administrator = role in {"administrator", "admin", "manager", "gerente"}
     is_hr = role in {"hr", "rh", "rh_catalogo", "hr_catalog"}
@@ -923,10 +923,11 @@ async def catalog_state_put(request: Request, s: Session = Depends(db_session)):
 
 @app.post("/api/v1/catalog-management/products/{product_id}/publication")
 async def set_publication(product_id: str, request: Request, s: Session = Depends(db_session)):
-    user = _require_catalog(request, "publish")
+    user = await run_in_threadpool(_require_catalog, request, "publish")
     body = await request.json()
     published = bool(body.get("published"))
-    erp_status, _, _ = _erp_call("GET", f"/products/{product_id}", token=_service_token())
+    service_token = await run_in_threadpool(_service_token)
+    erp_status, _, _ = await run_in_threadpool(_erp_call, "GET", f"/products/{product_id}", token=service_token)
     if erp_status >= 400:
         raise HTTPException(404, "Produto não encontrado no ERP")
     state = _get_catalog_state(s)
@@ -1249,7 +1250,7 @@ def orders_list(request: Request, s: Session = Depends(db_session)):
 async def orders_create(request: Request, s: Session = Depends(db_session)):
     if ENVIRONMENT == "production" and os.getenv("ENABLE_SALES_WRITES", "false").lower() != "true":
         raise HTTPException(503, "Vendas bloqueadas em produção até validar preços, descontos e aprovação no ERP")
-    user = _require_sales(request)
+    user = await run_in_threadpool(_require_sales, request)
     r = _normalize_role(user.get("role"))
     if r not in {"administrator", "admin", "manager", "gerente", "sales", "vendedor", "comercial"}:
         raise HTTPException(403, "Sem permissão para criar pedido")
@@ -1261,7 +1262,7 @@ async def orders_create(request: Request, s: Session = Depends(db_session)):
     erp_quote_id = None
     # Espelha no ERP para o pedido aparecer na operação existente mesmo sem módulo SalesOrder legado.
     try:
-        erp_quote_id, msg = _sync_order_as_quote({**payload, "code": code}, _token_from_request(request) or "")
+        erp_quote_id, msg = await run_in_threadpool(_sync_order_as_quote, {**payload, "code": code}, _token_from_request(request) or "")
         log.append(msg)
     except Exception as exc:
         log.append(f"Sincronização inicial pendente: {exc}")
@@ -1280,7 +1281,7 @@ def orders_get(order_id: str, request: Request, s: Session = Depends(db_session)
 
 @app.put("/api/v1/sales-orders/{order_id}")
 async def orders_update(order_id: str, request: Request, s: Session = Depends(db_session)):
-    _require_sales(request)
+    await run_in_threadpool(_require_sales, request)
     row = s.get(SalesOrder, order_id)
     if not row: raise HTTPException(404, "Pedido não encontrado")
     payload = _calc_order(await request.json())
@@ -1311,7 +1312,7 @@ def _append_log(row: SalesOrder, message: str):
 
 @app.post("/api/v1/sales-orders/{order_id}/confirm")
 async def orders_confirm(order_id: str, request: Request, s: Session = Depends(db_session)):
-    _require_sales(request)
+    await run_in_threadpool(_require_sales, request)
     if ENVIRONMENT == "production" and os.getenv("ENABLE_AUTOMATED_ORDER_CONFIRMATION", "false").lower() != "true":
         raise HTTPException(503, "Confirmação automática bloqueada em produção até haver idempotência e conciliação garantidas no ERP")
     body = {}
