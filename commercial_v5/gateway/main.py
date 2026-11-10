@@ -26,6 +26,7 @@ from PIL import Image, UnidentifiedImageError
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from starlette.concurrency import run_in_threadpool
 from pydantic import BaseModel
 from sqlalchemy import Column, DateTime, Integer, JSON, LargeBinary, String, Text, create_engine, select
@@ -182,6 +183,27 @@ app = FastAPI(
     version="5.0.1",
     description="Camada de integração entre o ERP principal, Comercial, Gestão de Catálogo/RH e site público.",
 )
+class TextResponseGZipMiddleware:
+    """Compress only text/JSON: images are already encoded as JPG/WebP."""
+    def __init__(self, app):
+        self.app=app
+        self.compressor=GZipMiddleware(app, minimum_size=2048, compresslevel=4)
+
+    async def __call__(self, scope, receive, send):
+        if scope.get("type")!="http":
+            return await self.app(scope,receive,send)
+        path=str(scope.get("path") or "")
+        if path.startswith("/comercial/"):
+            path=path[len("/comercial"):]
+        elif path=="/comercial":
+            path="/"
+        selected=(path in ("/", "/site-demo.html", "/api/v1/porto-velho/referencias")
+                  or (path.startswith("/api/v1/") and not path.startswith("/api/v1/media/")))
+        return await (self.compressor if selected else self.app)(scope,receive,send)
+
+
+app.add_middleware(TextResponseGZipMiddleware)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=CORS_ORIGINS,
@@ -1019,7 +1041,7 @@ def media_upload(body: MediaInput, request: Request, s: Session = Depends(db_ses
     except IntegrityError as exc:
         s.rollback()
         raise HTTPException(409, "Catálogo alterado simultaneamente. Repita o upload.") from exc
-    return {"id": mid, "product_id": body.product_id, "path": f"/media/{mid}", "url": url, "content_type": ctype}
+    return {"id": mid, "product_id": body.product_id, "path": f"/media/{mid}", "url": url, "revision": int(row.revision or 0) if row else 1, "content_type": ctype}
 
 
 @app.post("/api/v1/media/replace")
@@ -1501,7 +1523,7 @@ WEB_ROOT = Path(__file__).resolve().parent.parent
 
 @app.get("/", include_in_schema=False)
 def root():
-    return FileResponse(WEB_ROOT / "comercial" / "index.html", media_type="text/html")
+    return FileResponse(WEB_ROOT / "comercial" / "index.html", media_type="text/html", headers={"Cache-Control":"no-cache"})
 
 
 @app.get("/site-demo.html", include_in_schema=False)
@@ -1514,3 +1536,18 @@ def site_preview():
 _PV_IMAGES = WEB_ROOT / "pv_assets"
 if _PV_IMAGES.is_dir():
     app.mount("/pv-assets", StaticFiles(directory=str(_PV_IMAGES)), name="porto_velho_catalogo_imagens")
+
+# The new light-weight interface references a subset of cropped WebP photos and SVG/logo assets.
+_COMMERCIAL_ASSETS=WEB_ROOT / "assets"
+if _COMMERCIAL_ASSETS.is_dir():
+    app.mount("/assets", StaticFiles(directory=str(_COMMERCIAL_ASSETS)), name="facil_pedido_interface_assets")
+
+
+@app.get("/api/v1/porto-velho/referencias", include_in_schema=False)
+def porto_velho_referencias(request: Request):
+    _require_catalog(request,"read")
+    path=WEB_ROOT / "porto_velho_referencias.json"
+    if not path.is_file():
+        raise HTTPException(404,"Referências do catálogo indisponíveis")
+    return FileResponse(path,media_type="application/json",headers={"Cache-Control":"private, max-age=3600"})
+
