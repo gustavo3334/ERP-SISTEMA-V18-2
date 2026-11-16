@@ -448,7 +448,7 @@ function erpRows(input, label){
   throw new Error(`O ERP devolveu o formato inválido para ${label}. Confira a compatibilidade da API.`);
 }
 function stockRows(){return Array.isArray(state.balances)?state.balances:[]}
-async function loadAll(){
+async function loadAll({quickStart=false}={}){
   if(state.demo){
     demoData();
     const saved=localStorage.getItem("fp_commercial_v5_demo_state");
@@ -505,12 +505,21 @@ async function loadAll(){
       optionalJobs.push((async()=>{const [quotes,orders]=await Promise.all([API.request("/quotes").catch(()=>[]),API.request("/sales-orders").catch(()=>[])]);
       state.quotes=erpRows(quotes??[],"orçamentos");state.orders=erpRows(orders??[],"pedidos");})());
     }else{state.quotes=[];state.orders=[]}
-    await Promise.all([pendingCatalog,...optionalJobs]);
-    for(const product of state.products){const extra=state.catalog.productExtras?.[product.id]||{};for(const field of ["barcode","brand","supplier","material","width_cm","height_cm","depth_cm","warranty_months"]){if(extra[field]!=null)product[field]=extra[field]}}
-    state.systemUsers=[];
-    if(hasPermission("users.write"))API.request("/users").then(data=>{state.systemUsers=erpRows(data||[],"usuários")}).catch(()=>{});
-    if(state.inventoryWarning)toast(state.inventoryWarning,"error");
-    saveOfflineSnapshot();
+    // No login, a interface e exibida assim que o catalogo essencial chega.
+    // Clientes, pedidos, estado de fotos e demais colecoes sincronizam em segundo plano.
+    const syncToken=API.token();
+    const completeSync=async()=>{
+      await Promise.all([pendingCatalog,...optionalJobs]);
+      if(!state.demo&&syncToken!==API.token())return;
+      for(const product of state.products){const extra=state.catalog.productExtras?.[product.id]||{};for(const field of ["barcode","brand","supplier","material","width_cm","height_cm","depth_cm","warranty_months"]){if(extra[field]!=null)product[field]=extra[field]}}
+      state.systemUsers=[];
+      if(hasPermission("users.write"))API.request("/users").then(data=>{state.systemUsers=erpRows(data||[],"usuarios")}).catch(()=>{});
+      if(state.inventoryWarning)toast(state.inventoryWarning,"error");
+      saveOfflineSnapshot();
+      if(quickStart && !$("#appShell").classList.contains("hidden"))render();
+    };
+    if(quickStart)void completeSync().catch(e=>{console.warn("Sincronizacao complementar:",e);toast("Alguns dados continuam indisponiveis. Use Sincronizar novamente.","error")});
+    else await completeSync();
   }catch(e){
     if(!loadOfflineSnapshot())throw e;
     await loadAccess().catch(()=>{});
@@ -1661,7 +1670,7 @@ $("#loginForm").addEventListener("submit",async e=>{
   const form=e.currentTarget,submit=form.querySelector('button[type="submit"]');
   if(submit)submit.disabled=true;
   const fd=new FormData(form);
-  $("#loginStatus").textContent="Conectando...";
+  $("#loginStatus").textContent="Autenticando no ERP...";
   try{
     API.setBase(fd.get("apiBase"));
     const email=String(fd.get("email")||"").trim().toLowerCase();
@@ -1673,7 +1682,8 @@ $("#loginForm").addEventListener("submit",async e=>{
       API.setToken("");state.user=null;
       await login(email,String(fd.get("password")||""));
     }
-    await loadAll();state.demo=false;showApp();toast("ERP sincronizado");
+    $("#loginStatus").textContent="Login confirmado. Carregando catalogo...";
+    await loadAll({quickStart:true});state.demo=false;showApp();toast("Entrada liberada. Sincronizando dados complementares...");
     const requested=new URLSearchParams(location.search).get("product");if(requested&&!window._fpSharedLinkOpened){window._fpSharedLinkOpened=true;setTimeout(()=>openProduct(requested),100)}
   }catch(err){
     const authenticated=Boolean(API.token()&&state.user);
@@ -1698,5 +1708,5 @@ syncModalScroll();
 $("#apiBaseInput").value=API.base();bind();
 window.addEventListener("beforeunload",e=>{if(modern.dirty&&state.cart.length){e.preventDefault();e.returnValue=""}});
 
-if(API.token()&&API.base())(async()=>{try{state.user=await API.request("/auth/me");await loadAll();showApp();const requested=new URLSearchParams(location.search).get("product");if(requested&&!window._fpSharedLinkOpened){window._fpSharedLinkOpened=true;setTimeout(()=>openProduct(requested),100)}}catch{API.setToken("")}})();
+if(API.token()&&API.base())(async()=>{try{state.user=await API.request("/auth/me");await loadAll({quickStart:true});showApp();const requested=new URLSearchParams(location.search).get("product");if(requested&&!window._fpSharedLinkOpened){window._fpSharedLinkOpened=true;setTimeout(()=>openProduct(requested),100)}}catch{API.setToken("")}})();
 })();
